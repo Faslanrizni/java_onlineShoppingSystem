@@ -1,0 +1,194 @@
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
+public class WestMinisterShoppingManager implements ShoppingManager {
+    ArrayList<Product> productList = new ArrayList<>();
+  /*  ArrayList<Clothing> clothList = new ArrayList<>();
+    ArrayList<Electronic> ElectronicList = new ArrayList<>();*/
+
+    public WestMinisterShoppingManager(ArrayList<Product> productList) {
+        this.productList = productList;
+    }
+
+    private static final int MAX_PRODUCTS = 50;
+    Scanner input = new Scanner(System.in);
+
+    public WestMinisterShoppingManager() {
+
+    }
+
+    @Override
+    public void addProduct(Product product) {
+
+        if (productList.size() < MAX_PRODUCTS) {
+            productList.add(product);
+            System.out.println(product.getProductName() + " added successfully!");
+            System.out.println(productList);
+        } else {
+            System.out.println("Maximum product limit reached. Cannot add more products.");
+        }
+
+    }
+    @Override
+    public void removeProduct() {
+        System.out.println("enter the product id for remove product: ");
+        String removeProductId = input.nextLine();
+        Iterator<Product> iterator = productList.iterator();
+        while (iterator.hasNext()) {
+            Product product = iterator.next();
+            if (product.getProductId().equals(removeProductId)) {
+                iterator.remove();
+                System.out.println("Product deleted: " + product.getProductName() + " (ID: " + removeProductId + ")");
+                System.out.println("Total products left in the system: " + productList.size());
+                return;
+            }
+        }
+        System.out.println("Product with ID " + removeProductId + " not found.");
+    }
+    @Override
+    public void printProducts(ArrayList<Product> productList){
+        for (int i = 0; i <productList.size() ; i++) {
+            System.out.println(productList.get(i));
+        }
+        }
+    @Override
+    public void saveProducts(String filename) {
+
+    }
+
+    @Override
+    public boolean userOption() throws IOException {
+        Product product = new Product() {
+        };
+        Scanner input = new Scanner(System.in);
+
+        boolean keepGoing = false;
+        System.out.println("1)Add New product \n" +
+                "2) Delete product \n" +
+                "3) print the list of product \n" +
+                "4) Save in a file \n" +
+                " 0) Quit "
+        );
+        System.out.println("--------------------------------------------------");
+        int userOptions;
+        while (true){
+            String userInput = input.nextLine();
+            try {
+                userOptions = Integer.parseInt(userInput);
+                if(userOptions >= 0 && userOptions <=4){
+                    break;
+                }else {
+                    System.out.print("Enter a valid number: ");   // display when input range is incorrect
+                }
+
+
+            }catch (NumberFormatException e){
+                System.out.print("Enter a valid number : ");   // display when user entered a sting input
+            }
+        }
+
+        switch (userOptions) {
+            case 1:
+                System.out.println("Press 1 to add Clothing Product");
+                System.out.println("Press 2 to add Electronics product");
+                int userInput2 = input.nextInt();
+                input.nextLine();
+
+                System.out.println("Enter Product Id");
+                String productId = input.nextLine();
+                product.setProductId(productId);
+                input.nextLine();
+
+                System.out.println("Enter Product Name");
+                String productName = input.nextLine();
+                product.setProductName(productName);
+
+
+                System.out.println("Enter Product price");
+                double productPrice = input.nextDouble();
+                product.setPrice(productPrice);
+                input.nextLine();
+
+                System.out.println("Enter Product quantity");
+                int quantity = input.nextInt();
+                product.setQuantity(quantity);
+                input.nextLine();
+
+                switch (userInput2){
+                    case 1:
+                        Clothing clothing = new Clothing();
+                        System.out.println("Insert the Size");
+                        int size = input.nextInt();
+                        clothing.setSize(size);
+
+                        input.nextLine();
+
+                        System.out.println("Insert the Color");
+                        String color = input.nextLine();
+                        clothing.setColor(color);
+
+                        Clothing c = new Clothing(productId,productName,productPrice,quantity,size,color);
+                        this.addProduct(c);
+                        break;
+
+                    case 2:
+                        Electronic electronic = new Electronic();
+
+                        System.out.println("Enter the brand ");
+                        String brand = input.nextLine();
+                        electronic.setBrand(brand);
+                        input.nextLine();
+
+                        System.out.println("Enter the warranty period");
+                        int warrantyPeriod = input.nextInt();
+                        electronic.setWarrantyPeriod(warrantyPeriod);
+
+                        Electronic e = new Electronic(productId,productName,productPrice,quantity,brand,warrantyPeriod);
+                        this.addProduct(e);
+                }
+                break;
+            case 2:
+                removeProduct();
+                break;
+            case 3:
+                printProducts(productList);
+                break;
+            case 4:
+                save();
+                break;
+            case 0:
+                System.out.println("Have a good day!!..");
+                System.exit(0);
+
+            default:
+                System.out.println("invalid input enter valid number");
+        }
+        return keepGoing;
+
+    }
+
+    public void save() throws IOException {
+        FileWriter fileWriter = new FileWriter("save.txt");
+        fileWriter.write(String.valueOf(productList));
+    }
+    public static void load() throws IOException {
+        FileReader fr = new FileReader("save.txt");
+        int code = fr.read();
+        while (code != -1) {
+            System.out.print((char) code);
+
+            code = fr.read();
+        }
+    }
+    public static void main(String[] args) throws IOException {
+        ShoppingManager shoppingManager = new WestMinisterShoppingManager();
+        boolean keepGoing = false;
+        while (!keepGoing){
+            keepGoing = shoppingManager.userOption();
+        }
+
+    }
+
+}
