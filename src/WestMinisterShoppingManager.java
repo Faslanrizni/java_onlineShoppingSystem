@@ -3,6 +3,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+import static java.util.Collections.replaceAll;
+
 public class WestMinisterShoppingManager implements ShoppingManager {
     ArrayList<Product> productList = new ArrayList<>();
   /*  ArrayList<Clothing> clothList = new ArrayList<>();
@@ -49,9 +51,27 @@ public class WestMinisterShoppingManager implements ShoppingManager {
     }
     @Override
     public void printProducts(ArrayList<Product> productList){
+        for (int i = 0; i < productList.size() - 1; i++) {
+            for (int j = 0; j < productList.size() - i - 1; j++) {
+                Product compareProductOne = productList.get(j);
+                Product compareProductTwo = productList.get(j + 1);
+
+                // Compare based on the first two letters of productId
+                String id1Prefix = compareProductOne.getProductId().substring(0, 2);
+                String id2Prefix = compareProductTwo.getProductId().substring(0, 2);
+
+                if (id1Prefix.compareTo(id2Prefix) > 0) {
+                    // Swap if the first two letters are in the wrong order
+                    productList.set(j, compareProductTwo);
+                    productList.set(j + 1, compareProductOne);
+                }
+            }
+        }
+
         for (int i = 0; i <productList.size() ; i++) {
             System.out.println(productList.get(i));
         }
+
         }
     @Override
     public void saveProducts(String filename) {
@@ -69,6 +89,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                 "2) Delete product \n" +
                 "3) print the list of product \n" +
                 "4) Save in a file \n" +
+                "5) load from  file \n" +
                 " 0) Quit "
         );
         System.out.println("--------------------------------------------------");
@@ -77,7 +98,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
             String userInput = input.nextLine();
             try {
                 userOptions = Integer.parseInt(userInput);
-                if(userOptions >= 0 && userOptions <=4){
+                if(userOptions >= 0 && userOptions <=5){
                     break;
                 }else {
                     System.out.print("Enter a valid number: ");   // display when input range is incorrect
@@ -133,20 +154,32 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                         System.out.print("Enter double value : ");   // display when user entered a sting input
                     }
                 }
-//                double productPrice = input.nextDouble();
+
                 product.setPrice(productPrice);
                 input.nextLine();
-
                 System.out.println("Enter Product quantity");
-                int quantity = input.nextInt();
-                product.setQuantity(quantity);
+                int quantity;
+                while (true){
+                    String userInput = input.nextLine();
+                    try {
+                        quantity = Integer.parseInt(userInput);
+                        if(quantity <= 0){
+                            System.out.println("try again ");
+                            continue;
+                        }
+                        break;
+                    }catch (NumberFormatException e){
+                        System.out.print("Enter a valid number : ");   // display when user entered a sting input
+                    }
+                }
                 input.nextLine();
-
+                product.setQuantity(quantity);
                 switch (userOptions1){
                     case 1:
                         Clothing clothing = new Clothing();
-                        System.out.println("Insert the Size('XXL','XL','L','M')");
-                        String size = input.nextLine();
+
+                        String size = getSize();
+                        isValidSize(size);
                         clothing.setSize(size);
 
                         input.nextLine();
@@ -184,6 +217,9 @@ public class WestMinisterShoppingManager implements ShoppingManager {
             case 4:
                 save();
                 break;
+            case 5:
+                load();
+                break;
             case 0:
                 System.out.println("Have a good day!!..");
                 System.exit(0);
@@ -196,10 +232,29 @@ public class WestMinisterShoppingManager implements ShoppingManager {
     }
 
     public void save() throws IOException {
-        FileWriter fileWriter = new FileWriter("save.txt");
-        fileWriter.write(String.valueOf(productList));
+        FileWriter fos = new FileWriter("save.txt");
+        for (Product product : productList) {
+            fos.write("product ID " + product.getProductId()+ "\n");
+            fos.write("product Name " + product.getProductName()+ "\n");
+            fos.write("product Price" + product.getPrice()+ "\n");
+            fos.write("product Quantity " + product.getQuantity()+ "\n");
+
+            if (product instanceof Clothing){
+                Clothing clothing = (Clothing) product;
+                fos.write("Product Size  " + clothing.getSize()+ "\n");
+                fos.write("Product color  "+ clothing.getColor()+ "\n");
+            } else if (product instanceof Electronic) {
+                Electronic electronic = (Electronic) product;
+                fos.write("Product brand  "+ electronic.getBrand()+ "\n");
+                fos.write("Product Warranty Period  "+ electronic.getWarrantyPeriod()+ "\n");
+
+            }
+        }
+        fos.close();
     }
+
     public static void load() throws IOException {
+
         FileReader fr = new FileReader("save.txt");
         int code = fr.read();
         while (code != -1) {
@@ -227,6 +282,16 @@ public class WestMinisterShoppingManager implements ShoppingManager {
 
         return false;
     }
+    private boolean  isValidSize(String size){
+        String [] validSize = {"XXL","XL","L","M"};
+
+        for (String sizeChoice: validSize){
+            if (sizeChoice.equals(size.toUpperCase())){
+                return true;
+            }
+        }
+        return false;
+    }
     public String getProductId(){
         Scanner input = new Scanner(System.in);
 
@@ -242,6 +307,19 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                 continue;
             }
             return productId;
+        }while (true);
+    }
+    public String getSize(){
+        Scanner input = new Scanner(System.in);
+        do {
+            System.out.println("Insert the Size('XXL','XL','L','M')");
+            String size = input.nextLine();
+            if (!isValidSize(size)){
+                System.out.println("invalid Size");
+                continue;
+            }
+            System.out.println(" you entered " +size);
+            return size;
         }while (true);
     }
 
@@ -297,12 +375,8 @@ public class WestMinisterShoppingManager implements ShoppingManager {
 
     }
 
+
     public static void main(String[] args) throws IOException {
-      /*  ShoppingManager shoppingManager = new WestMinisterShoppingManager();
-        boolean keepGoing = false;
-        while (!keepGoing){
-            keepGoing = shoppingManager.userOption();
-        }*/
         MainOption();
     }
 

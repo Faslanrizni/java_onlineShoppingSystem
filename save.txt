@@ -1,0 +1,6 @@
+product ID sd741
+product Name 
+product Price500.0
+product Quantity 10
+Product Size  xxl
+Product color  red
