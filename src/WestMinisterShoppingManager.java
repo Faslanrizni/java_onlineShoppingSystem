@@ -111,7 +111,6 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                     }
                 }
 
-
                 String productId = getProductId();
 
                 System.out.println("Enter Product Name");
@@ -240,13 +239,56 @@ public class WestMinisterShoppingManager implements ShoppingManager {
         }
         return false;
     }
+    public static int MainOption() throws IOException {
+        Scanner input = new Scanner(System.in);
+
+        boolean keepGoing = false;
+        System.out.println("1)Manager Console \n" +
+                "2) User Console \n" +
+                " 0) Quit "
+        );
+        System.out.println("--------------------------------------------------");
+        int userOptions;
+        while (true){
+            String userInput = input.nextLine();
+            try {
+                userOptions = Integer.parseInt(userInput);
+                if(userOptions >= 0 && userOptions <=4){
+                    break;
+                }else {
+                    System.out.print("Enter a valid number: ");   // display when input range is incorrect
+                }
+
+            }catch (NumberFormatException e){
+                System.out.print("Enter a valid number : ");   // display when user entered a sting input
+            }
+        }
+        switch (userOptions){
+            case 1 :{
+                ShoppingManager shoppingManager = new WestMinisterShoppingManager();
+                boolean keepGoing1 = false;
+                while (!keepGoing1){
+                    keepGoing1 = shoppingManager.userOption();
+                }
+            }
+            case 2:{
+                System.out.println("User Console");
+                break;
+            }
+            case 0:
+                System.exit(0);
+        }
+      return userOptions;
+
+    }
+
     public static void main(String[] args) throws IOException {
-        ShoppingManager shoppingManager = new WestMinisterShoppingManager();
+      /*  ShoppingManager shoppingManager = new WestMinisterShoppingManager();
         boolean keepGoing = false;
         while (!keepGoing){
             keepGoing = shoppingManager.userOption();
-        }
-
+        }*/
+        MainOption();
     }
 
 }
