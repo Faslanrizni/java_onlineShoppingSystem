@@ -119,7 +119,21 @@ public class WestMinisterShoppingManager implements ShoppingManager {
 
 
                 System.out.println("Enter Product price");
-                double productPrice = input.nextDouble();
+                double productPrice;
+                while (true){
+                   /* Double managerInputPrice = input.nextDouble();*/
+                    try {
+                        productPrice = Double.parseDouble(input.next());
+                        if(productPrice <= 0 ){
+                            System.out.println("Enter a positive Number: ");
+                            continue;
+                        }
+                        break;
+                    }catch (NumberFormatException e){
+                        System.out.print("Enter double value : ");   // display when user entered a sting input
+                    }
+                }
+//                double productPrice = input.nextDouble();
                 product.setPrice(productPrice);
                 input.nextLine();
 
@@ -131,8 +145,8 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                 switch (userOptions1){
                     case 1:
                         Clothing clothing = new Clothing();
-                        System.out.println("Insert the Size");
-                        int size = input.nextInt();
+                        System.out.println("Insert the Size('XXL','XL','L','M')");
+                        String size = input.nextLine();
                         clothing.setSize(size);
 
                         input.nextLine();
@@ -153,7 +167,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                         electronic.setBrand(brand);
                         input.nextLine();
 
-                        System.out.println("Enter the warranty period");
+                        System.out.println("Enter the warranty period from years");
                         int warrantyPeriod = input.nextInt();
                         electronic.setWarrantyPeriod(warrantyPeriod);
 
@@ -253,7 +267,8 @@ public class WestMinisterShoppingManager implements ShoppingManager {
             String userInput = input.nextLine();
             try {
                 userOptions = Integer.parseInt(userInput);
-                if(userOptions >= 0 && userOptions <=4){
+                if(userOptions >= 1 && userOptions <=2){
+                   /* System.out.println("Enter valid user option");*/
                     break;
                 }else {
                     System.out.print("Enter a valid number: ");   // display when input range is incorrect
