@@ -83,7 +83,6 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                     System.out.print("Enter a valid number: ");   // display when input range is incorrect
                 }
 
-
             }catch (NumberFormatException e){
                 System.out.print("Enter a valid number : ");   // display when user entered a sting input
             }
@@ -93,13 +92,27 @@ public class WestMinisterShoppingManager implements ShoppingManager {
             case 1:
                 System.out.println("Press 1 to add Clothing Product");
                 System.out.println("Press 2 to add Electronics product");
-                int userInput2 = input.nextInt();
-                input.nextLine();
+//                int userInput2 = input.nextInt();
+//                input.nextLine();
+                int userOptions1;
+                while (true){
+                    String userInput = input.nextLine();
+                    try {
+                        userOptions1 = Integer.parseInt(userInput);
+                        if(userOptions1 >= 0 && userOptions1 <=2){
+                            break;
+                        }else {
+                            System.out.print("Enter a valid number: ");   // display when input range is incorrect
+                        }
 
-                System.out.println("Enter Product Id");
-                String productId = input.nextLine();
-                product.setProductId(productId);
-                input.nextLine();
+
+                    }catch (NumberFormatException e){
+                        System.out.print("Enter a valid number : ");   // display when user entered a sting input
+                    }
+                }
+
+
+                String productId = getProductId();
 
                 System.out.println("Enter Product Name");
                 String productName = input.nextLine();
@@ -116,7 +129,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                 product.setQuantity(quantity);
                 input.nextLine();
 
-                switch (userInput2){
+                switch (userOptions1){
                     case 1:
                         Clothing clothing = new Clothing();
                         System.out.println("Insert the Size");
@@ -181,6 +194,51 @@ public class WestMinisterShoppingManager implements ShoppingManager {
 
             code = fr.read();
         }
+    }
+
+    private boolean validateID(String id) {
+        // Two alphabetical letters followed by numeric digits
+        if (id.length() == 5) {
+            char firstChar = id.charAt(0);
+            char secondChar = id.charAt(1);
+
+            if (Character.isLetter(firstChar) && Character.isLetter(secondChar)) {
+                String numericPart = id.substring(2);
+
+                if (numericPart.matches("\\d{3}")) {
+                    // Check if the remaining characters are numeric
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    public String getProductId(){
+        Scanner input = new Scanner(System.in);
+
+        do {
+            System.out.println("Enter product Id( Eg: SD123 Two alphabetical letters followed by 3 numeric digit  )");
+            String productId = input.nextLine();
+            if (!validateID(productId)){
+                System.out.println("Invalid Id");
+                continue;
+            }
+            else if (isAllReadyExistsProductID(productId)){
+                System.out.println("product id is already exist");
+                continue;
+            }
+            return productId;
+        }while (true);
+    }
+
+    private boolean isAllReadyExistsProductID(String id){
+        for (Product productDetail : productList){
+            if(productDetail.getProductId().equals(id)){
+              return true;
+            }
+        }
+        return false;
     }
     public static void main(String[] args) throws IOException {
         ShoppingManager shoppingManager = new WestMinisterShoppingManager();
