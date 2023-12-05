@@ -402,7 +402,24 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                 break;
             }
             case 2:{
-                UserManager.userLogin();
+                System.out.println(" Enter 1 already registered" + "\n" +
+                        "Enter 2 if new to here");
+                System.out.println("Enter the option");
+                int option = input.nextInt();
+                switch (option){
+                    case 1: {
+                        UserManager.userLogin();
+                        break;
+                    }
+                    case 2 : {
+                        UserManager.userRegister();
+                        break;
+                    }
+                    default:{
+                        System.out.println("Enter valid input");
+                    }
+                }
+
                 System.out.println("User Console");
                 break;
             }
