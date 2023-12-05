@@ -5,10 +5,8 @@ import java.util.*;
 
 import static java.util.Collections.replaceAll;
 
-public class WestMinisterShoppingManager implements ShoppingManager {
+public  class WestMinisterShoppingManager implements ShoppingManager {
     ArrayList<Product> productList = new ArrayList<>();
-  /*  ArrayList<Clothing> clothList = new ArrayList<>();
-    ArrayList<Electronic> ElectronicList = new ArrayList<>();*/
 
     public WestMinisterShoppingManager(ArrayList<Product> productList) {
         this.productList = productList;
@@ -20,6 +18,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
     public WestMinisterShoppingManager() {
 
     }
+    /*===========================add product==========================*/
 
     @Override
     public void addProduct(Product product) {
@@ -33,6 +32,9 @@ public class WestMinisterShoppingManager implements ShoppingManager {
         }
 
     }
+    /*===========================add product==========================*/
+
+    /*=========================delete product==========================*/
     @Override
     public void removeProduct() {
         System.out.println("enter the product id for remove product: ");
@@ -49,6 +51,10 @@ public class WestMinisterShoppingManager implements ShoppingManager {
         }
         System.out.println("Product with ID " + removeProductId + " not found.");
     }
+
+    /*=========================delete product==========================*/
+
+    /*======================print product and alphabetically sorted based on the first two letters of productId===================*/
     @Override
     public void printProducts(ArrayList<Product> productList){
         for (int i = 0; i < productList.size() - 1; i++) {
@@ -61,18 +67,42 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                 String id2Prefix = compareProductTwo.getProductId().substring(0, 2);
 
                 if (id1Prefix.compareTo(id2Prefix) > 0) {
-                    // Swap if the first two letters are in the wrong order
+
                     productList.set(j, compareProductTwo);
                     productList.set(j + 1, compareProductOne);
                 }
             }
         }
 
-        for (int i = 0; i <productList.size() ; i++) {
-            System.out.println(productList.get(i));
+        for (Product product : productList) {
+            if (product instanceof Clothing) {
+                Clothing clothing = (Clothing) product;
+                System.out.println("==========Clothing ==========");
+                System.out.println("Product ID: " + clothing.getProductId());
+                System.out.println("Product Name: " + clothing.getProductName());
+                System.out.println("Product Price: " + clothing.getPrice());
+                System.out.println("Product Quantity: " + clothing.getQuantity());
+                System.out.println("Product Size: " + clothing.getSize());
+                System.out.println("Product Color: " + clothing.getColor());
+            } else if (product instanceof Electronic) {
+
+                Electronic electronic = (Electronic) product;
+                System.out.println("=============Electronics============= ");
+                System.out.println("Product ID: " + electronic.getProductId());
+                System.out.println("Product Name: " + electronic.getProductName());
+                System.out.println("Product Price: " + electronic.getPrice());
+                System.out.println("Product Quantity: " + electronic.getQuantity());
+                System.out.println("Product Brand: " + electronic.getBrand());
+                System.out.println("Product Warranty Period: " + electronic.getWarrantyPeriod() + " years");
+
+            }
+            System.out.println(); // Add a separator between products
+
         }
 
         }
+
+    /*======================print product and alphabetically sorted based on the first two letters of productId===================*/
     @Override
     public void saveProducts(String filename) {
 
@@ -333,6 +363,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
     }
     public static int MainOption() throws IOException {
         Scanner input = new Scanner(System.in);
+        ArrayList <User> userList = new ArrayList<>();
 
         boolean keepGoing = false;
         System.out.println("1)Manager Console \n" +
@@ -358,13 +389,20 @@ public class WestMinisterShoppingManager implements ShoppingManager {
         }
         switch (userOptions){
             case 1 :{
-                ShoppingManager shoppingManager = new WestMinisterShoppingManager();
-                boolean keepGoing1 = false;
-                while (!keepGoing1){
-                    keepGoing1 = shoppingManager.userOption();
+                if (UserManager.ManagerLogin()){
+                    ShoppingManager shoppingManager = new WestMinisterShoppingManager();
+                    boolean keepGoing1 = false;
+                    while (!keepGoing1){
+                        keepGoing1 = shoppingManager.userOption();
                 }
+
+                }else{
+                    System.out.println("manager login failed");
+                }
+                break;
             }
             case 2:{
+                UserManager.userLogin();
                 System.out.println("User Console");
                 break;
             }
@@ -372,10 +410,7 @@ public class WestMinisterShoppingManager implements ShoppingManager {
                 System.exit(0);
         }
       return userOptions;
-
     }
-
-
     public static void main(String[] args) throws IOException {
         MainOption();
     }
