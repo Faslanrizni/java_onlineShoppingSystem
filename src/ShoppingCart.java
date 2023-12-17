@@ -78,7 +78,8 @@ public class ShoppingCart extends JFrame {
         productModel.addColumn("Name");
         productModel.addColumn("Category");
         productModel.addColumn("Price");
-        productModel.addColumn("Info");
+        productModel.addColumn("Quantity");
+        productModel.addColumn("Extra Information");
 
         productDataTable = new JTable(productModel);
         productDataTable.setPreferredScrollableViewportSize(new Dimension(100, 150));
@@ -124,13 +125,25 @@ public class ShoppingCart extends JFrame {
         productModel.setRowCount(0);
 
         for (Product product : WestMinisterShoppingManager.getProductList()) {
+            String extraInformation = "";
             String productId = product.getProductId();
             String name = product.getProductName();
             String category = product.getCategory();
             double price = product.getPrice();
             int quantity = product.getQuantity();
+            if (product instanceof Clothing) {
+                Clothing clothing = (Clothing) product;
+                extraInformation =
+                        ", Color: " + clothing.getColor() +"\n"+
+                        ", Size: " + clothing.getSize();
+            } else if (product instanceof Electronic) {
+                Electronic electronic = (Electronic) product;
+                extraInformation = "Brand: " + electronic.getBrand() +"\n"+
+                        ", warranty period from years: " + electronic.getWarrantyPeriod();
+            }
 
-            Object[] rowData = {productId, name, category, price, quantity};
+
+            Object[] rowData = {productId, name, category, price, quantity,extraInformation};
             productModel.addRow(rowData);
         }
         productModel.fireTableDataChanged(); /*use fireTableDataChanged() to inform the observers to refresh and display the updated information.*/

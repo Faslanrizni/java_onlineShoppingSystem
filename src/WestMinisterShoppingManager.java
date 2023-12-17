@@ -11,6 +11,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
     }
 
     private static ArrayList<Product> productList = new ArrayList<>();/*can be accessed across instances*/
+    private static final ArrayList<Product> ExtraIntoProductList = new ArrayList<>();/*can be accessed across instances*/
 
     public WestMinisterShoppingManager(ArrayList<Product> productList) {
         this.productList = productList;
@@ -230,6 +231,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                         clothing.setColor(color);
 
                         Clothing c = new Clothing(productId,productName,productPrice,quantity,size,color);
+                        Clothing ClothingExtraInfo = new Clothing(size,color);
                         this.addProduct(c);
 
 
@@ -249,6 +251,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                         electronic.setWarrantyPeriod(warrantyPeriod);
 
                         Electronic e = new Electronic(productId,productName,productPrice,quantity,brand,warrantyPeriod);
+                        Electronic electronicExtraInfo = new Electronic(brand,warrantyPeriod);
                         this.addProduct(e);
                 }
                 break;
