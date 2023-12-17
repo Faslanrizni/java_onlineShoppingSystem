@@ -31,12 +31,16 @@ public class ShoppingCart extends JFrame {
 
 
         /*========dropDown for select product type==========*/
+
         String[] productTypes = {"Clothing", "Electronic", "All"};
 
         categoryComboBox = new JComboBox<>(productTypes);
         categoryComboBox.setPreferredSize(new Dimension(150, 50));
         categoryComboBox.setSelectedIndex(2);
-        categoryComboBox.addActionListener(new ActionListener() {
+        topRow.add(categoryComboBox);
+
+        /*========dropDown for select product type==========*/
+        /*categoryComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String selectedProductType = (String) categoryComboBox.getSelectedItem();
@@ -44,10 +48,10 @@ public class ShoppingCart extends JFrame {
                 ArrayList<Product> productList = manager.getProductList(selectedProductType);
                 updateProductTable(productList);
             }
-        });
-        topRow.add(categoryComboBox);
+        });*/
 
-        /*========dropDown for select product type==========*/
+
+
 
         /*==========shopping cart button===========*/
         shoppingCartButton = new JButton("Shopping Cart");
@@ -128,6 +132,6 @@ public class ShoppingCart extends JFrame {
             Object[] rowData = {productId, name, category, price, quantity};
             productModel.addRow(rowData);
         }
-        productModel.fireTableDataChanged();
+        productModel.fireTableDataChanged(); /*use fireTableDataChanged() to inform the observers to refresh and display the updated information.*/
     }
 }

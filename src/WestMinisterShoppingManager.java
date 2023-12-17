@@ -24,6 +24,11 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
     public void addProduct(Product product) {
 
         if (productList.size() < MAX_PRODUCTS) {
+            if (product instanceof Clothing){
+                product.setCategory("Clothing");
+            } else if (product instanceof Electronic) {
+                product.setCategory("Electronic");
+            }
             productList.add(product);
             System.out.println(product.getProductName() + " added successfully!");
             System.out.println(productList);
@@ -208,7 +213,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                 switch (userOptions1){
                     case 1:
                         Clothing clothing = new Clothing();
-
+                        clothing.setCategory("Clothing");
                         String size = getSize();
                         isValidSize(size);
                         clothing.setSize(size);
@@ -227,6 +232,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
 
                     case 2:
                         Electronic electronic = new Electronic();
+                        electronic.setCategory("Electronic");
 
                         System.out.println("Enter the brand ");
                         String brand = input.nextLine();
@@ -303,6 +309,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
             code = fr.read();
         }
     }
+
 
     private boolean validateID(String id) {
         // Two alphabetical letters followed by numeric digits
@@ -439,7 +446,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
       return userOptions;
     }
 
-    public void updateProductTable(ArrayList<Product> productList) {
+/*    public void updateProductTable(ArrayList<Product> productList) {
         DefaultTableModel productModel = (DefaultTableModel) ShoppingCart.productDataTable.getModel();
         productModel.setRowCount(0);
 
@@ -454,9 +461,9 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
             productModel.addRow(rowData);
         }
         productModel.fireTableDataChanged();
-    }
+    }*/
 
-    public ArrayList<Product> getProductList(String productType) {
+/*    public ArrayList<Product> getProductList(String productType) {
         // Create a new empty list to store filtered products
         ArrayList<Product> filteredProducts = new ArrayList<>();
 
@@ -477,7 +484,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
 
         // Return the filtered list of products
         return filteredProducts;
-    }
+    }*/
 
 
 
