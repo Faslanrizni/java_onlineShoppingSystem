@@ -1,6 +1,6 @@
-product ID sd741
-product Name 
-product Price500.0
+product ID sd789
+product Name apple
+product Price100.0
 product Quantity 10
-Product Size  xxl
+Product Size  XXL
 Product color  red

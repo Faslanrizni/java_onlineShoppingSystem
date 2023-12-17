@@ -1,9 +1,9 @@
+import javax.swing.table.DefaultTableModel;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import static java.util.Collections.replaceAll;
 
 public  class WestMinisterShoppingManager implements ShoppingManager {
     ArrayList<Product> productList = new ArrayList<>();
@@ -120,6 +120,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                 "3) print the list of product \n" +
                 "4) Save in a file \n" +
                 "5) load from  file \n" +
+                "6) Go to home \n" +
                 " 0) Quit "
         );
         System.out.println("--------------------------------------------------");
@@ -128,7 +129,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
             String userInput = input.nextLine();
             try {
                 userOptions = Integer.parseInt(userInput);
-                if(userOptions >= 0 && userOptions <=5){
+                if(userOptions >= 0 && userOptions <=6){
                     break;
                 }else {
                     System.out.print("Enter a valid number: ");   // display when input range is incorrect
@@ -220,6 +221,8 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
 
                         Clothing c = new Clothing(productId,productName,productPrice,quantity,size,color);
                         this.addProduct(c);
+
+
                         break;
 
                     case 2:
@@ -249,6 +252,13 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                 break;
             case 5:
                 load();
+                break;
+            case 6:
+                ShoppingCart shoppingCart = new ShoppingCart();
+
+                // Update the JTable in ShoppingCart with the current product data
+                ShoppingCart.updateProductTable(productList);
+                MainOption();
                 break;
             case 0:
                 System.out.println("Have a good day!!..");
@@ -419,7 +429,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
                         System.out.println("Enter valid input");
                     }
                 }
-
+                 new ShoppingCart();
                 System.out.println("User Console");
                 break;
             }
@@ -428,8 +438,53 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
         }
       return userOptions;
     }
+
+    public void updateProductTable(ArrayList<Product> productList) {
+        DefaultTableModel productModel = (DefaultTableModel) ShoppingCart.productDataTable.getModel();
+        productModel.setRowCount(0);
+
+        for (Product product : productList) {
+            String productId = product.getProductId();
+            String name = product.getProductName();
+            String category = product.getCategory();
+            double price = product.getPrice();
+            int quantity = product.getQuantity();
+
+            Object[] rowData = {productId, name, category, price, quantity};
+            productModel.addRow(rowData);
+        }
+        productModel.fireTableDataChanged();
+    }
+
+    public ArrayList<Product> getProductList(String productType) {
+        // Create a new empty list to store filtered products
+        ArrayList<Product> filteredProducts = new ArrayList<>();
+
+        // Check if a product type is provided
+        if (productType != null && !productType.isEmpty()) {
+            // Loop through the existing product list
+            for (Product product : productList) {
+                // Check if the product category matches the requested type
+                if (product.getCategory().toLowerCase().equals(productType)) {
+                    // Add the matching product to the filtered list
+                    filteredProducts.add(product);
+                }
+            }
+        } else {
+            // If no product type is provided, return the entire list
+            filteredProducts.addAll(productList);
+        }
+
+        // Return the filtered list of products
+        return filteredProducts;
+    }
+
+
+
     public static void main(String[] args) throws IOException {
         MainOption();
     }
+
+
 
 }
