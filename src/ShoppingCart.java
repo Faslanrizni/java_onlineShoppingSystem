@@ -1,8 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class ShoppingCart extends JFrame {
@@ -63,6 +61,8 @@ public class ShoppingCart extends JFrame {
         /*==========shopping cart button===========*/
 
 
+
+
         panelNorth.add("North", topRow);
         /*===========================================NORTH==================================================*/
 
@@ -120,9 +120,10 @@ public class ShoppingCart extends JFrame {
 
     //  method to update the JTable with new product data
     public static void updateProductTable(ArrayList<Product> productList) {
+        DefaultTableModel productModel = (DefaultTableModel) productDataTable.getModel();
         productModel.setRowCount(0);
 
-        for (Product product : productList) {
+        for (Product product : WestMinisterShoppingManager.getProductList()) {
             String productId = product.getProductId();
             String name = product.getProductName();
             String category = product.getCategory();

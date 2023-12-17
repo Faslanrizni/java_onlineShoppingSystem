@@ -6,7 +6,11 @@ import java.util.*;
 
 
 public  class WestMinisterShoppingManager implements ShoppingManager {
-    ArrayList<Product> productList = new ArrayList<>();
+    public static ArrayList<Product> getProductList() {
+        return productList;
+    }
+
+    private static ArrayList<Product> productList = new ArrayList<>();/*can be accessed across instances*/
 
     public WestMinisterShoppingManager(ArrayList<Product> productList) {
         this.productList = productList;
@@ -32,6 +36,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
             productList.add(product);
             System.out.println(product.getProductName() + " added successfully!");
             System.out.println(productList);
+
         } else {
             System.out.println("Maximum product limit reached. Cannot add more products.");
         }
