@@ -454,7 +454,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
       return userOptions;
     }
 
-/*    public void updateProductTable(ArrayList<Product> productList) {
+    public void updateProductTable(ArrayList<Product> productList) {
         DefaultTableModel productModel = (DefaultTableModel) ShoppingCart.productDataTable.getModel();
         productModel.setRowCount(0);
 
@@ -469,9 +469,9 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
             productModel.addRow(rowData);
         }
         productModel.fireTableDataChanged();
-    }*/
+    }
 
-/*    public ArrayList<Product> getProductList(String productType) {
+    public ArrayList<Product> getProductList(String productType) {
         // Create a new empty list to store filtered products
         ArrayList<Product> filteredProducts = new ArrayList<>();
 
@@ -492,7 +492,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
 
         // Return the filtered list of products
         return filteredProducts;
-    }*/
+    }
 
 
 

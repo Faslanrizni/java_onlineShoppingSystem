@@ -1,6 +1,9 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class ShoppingCart extends JFrame {
@@ -9,8 +12,10 @@ public class ShoppingCart extends JFrame {
     private static JButton shoppingCartButton,addToCart;
     static JTable productDataTable;
     private static DefaultTableModel productModel;
+    private static TableRowSorter<DefaultTableModel> sorter;
 
     public ShoppingCart() {
+
         JFrame shoppingCartMain = new JFrame();
         shoppingCartMain.setSize(600, 600);
         JPanel panelNorth = new JPanel(new GridLayout(3, 1));
@@ -18,6 +23,8 @@ public class ShoppingCart extends JFrame {
         shoppingCartMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
+
+
 
 
         /*===========================================NORTH==================================================*/
@@ -37,6 +44,14 @@ public class ShoppingCart extends JFrame {
         categoryComboBox.setSelectedIndex(2);
         topRow.add(categoryComboBox);
 
+        categoryComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedProductType = (String) categoryComboBox.getSelectedItem();
+                filterTable(selectedProductType);
+            }
+        });
+
         /*========dropDown for select product type==========*/
         /*categoryComboBox.addActionListener(new ActionListener() {
             @Override
@@ -47,8 +62,6 @@ public class ShoppingCart extends JFrame {
                 updateProductTable(productList);
             }
         });*/
-
-
 
 
         /*==========shopping cart button===========*/
@@ -81,11 +94,16 @@ public class ShoppingCart extends JFrame {
         productModel.addColumn("Quantity");
         productModel.addColumn("Extra Information");
 
+
+
         productDataTable = new JTable(productModel);
         productDataTable.setPreferredScrollableViewportSize(new Dimension(100, 150));
 
         JScrollPane scrollPane = new JScrollPane(productDataTable);
         panelCenter.add(scrollPane, BorderLayout.CENTER);
+
+        sorter = new TableRowSorter<>(productModel);
+        productDataTable.setRowSorter(sorter);
 
         panelNorth.add("Center", panelCenter);
 
@@ -118,6 +136,31 @@ public class ShoppingCart extends JFrame {
 
         shoppingCartMain.setVisible(true);
     }
+    private void filterTable(String selectedProductType) {
+        RowFilter<DefaultTableModel, Object> rowFilter = new RowFilter<DefaultTableModel, Object>() {
+            @Override
+            public boolean include(Entry<? extends DefaultTableModel, ? extends Object> entry) {
+                // Customize the filtering logic based on the selected product type
+                if ("All".equals(selectedProductType)) {
+                    return true; // Show all rows
+                }
+
+                String category = (String) entry.getValue(2); // Assuming category is at index 2
+                if ("Electronic".equals(selectedProductType)) {
+                    return "Electronic".equals(category);
+                } else if ("Clothing".equals(selectedProductType)) {
+                    return "Clothing".equals(category);
+                } else {
+
+                    return false;
+                }
+            }
+        };
+
+        // Apply the filter
+        sorter.setRowFilter(rowFilter);
+    }
+
 
     //  method to update the JTable with new product data
     public static void updateProductTable(ArrayList<Product> productList) {
