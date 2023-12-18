@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -120,6 +122,32 @@ public class ShoppingCart extends JFrame {
         JLabel leftLabel = new JLabel();
         panelBottomButton.add(leftLabel);
 
+        /*=============updating the selected row in below============================================*/
+        productDataTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    // When the selection changes, update the description
+                    int selectedRow = productDataTable.getSelectedRow();
+                    if (selectedRow != -1) {
+                        // Get the data from the selected row
+                        String productId = (String) productModel.getValueAt(selectedRow, 0);
+                        String productName = (String) productModel.getValueAt(selectedRow, 1);
+                        String category = (String) productModel.getValueAt(selectedRow, 2);
+                        double price = (double) productModel.getValueAt(selectedRow, 3);
+                        int quantity = (int) productModel.getValueAt(selectedRow, 4);
+                        String extraInformation = (String) productModel.getValueAt(selectedRow, 5);
+
+                        // Update the labelBottom with the selected product details
+                        updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
+                    }
+                }
+            }
+
+
+        });
+        /*=============updating the selected row in below============================================*/
 
         addToCart = new JButton("Add to Shopping Cart");
         addToCart.setMinimumSize(new Dimension(150, 30));
@@ -136,6 +164,18 @@ public class ShoppingCart extends JFrame {
 
         shoppingCartMain.setVisible(true);
     }
+    private void updateSelectedProductDetails(String productId, String productName, String category, double price, int quantity, String extraInformation) {
+        labelBottom.setText("<html>Selected Product Details <br>"+
+                "Product ID: " + productId + "<br>" +
+                "Product Name: " + productName + "<br>" +
+                "Category: " + category + "<br>" +
+                "Price: " + price + "<br>" +
+                "Quantity: " + quantity + "<br>" +
+                "Extra Information: " + extraInformation+"</html>");
+    }
+    /*html tags allows to  formatting the text displayed in the JLabel*/
+
+    /*=================table sort==================================================*/
     private void filterTable(String selectedProductType) {
         RowFilter<DefaultTableModel, Object> rowFilter = new RowFilter<DefaultTableModel, Object>() {
             @Override
@@ -160,6 +200,8 @@ public class ShoppingCart extends JFrame {
         // Apply the filter
         sorter.setRowFilter(rowFilter);
     }
+
+    /*=================table sort==================================================*/
 
 
     //  method to update the JTable with new product data

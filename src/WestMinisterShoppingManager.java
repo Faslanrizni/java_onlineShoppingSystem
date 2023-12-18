@@ -454,45 +454,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
       return userOptions;
     }
 
-    public void updateProductTable(ArrayList<Product> productList) {
-        DefaultTableModel productModel = (DefaultTableModel) ShoppingCart.productDataTable.getModel();
-        productModel.setRowCount(0);
 
-        for (Product product : productList) {
-            String productId = product.getProductId();
-            String name = product.getProductName();
-            String category = product.getCategory();
-            double price = product.getPrice();
-            int quantity = product.getQuantity();
-
-            Object[] rowData = {productId, name, category, price, quantity};
-            productModel.addRow(rowData);
-        }
-        productModel.fireTableDataChanged();
-    }
-
-    public ArrayList<Product> getProductList(String productType) {
-        // Create a new empty list to store filtered products
-        ArrayList<Product> filteredProducts = new ArrayList<>();
-
-        // Check if a product type is provided
-        if (productType != null && !productType.isEmpty()) {
-            // Loop through the existing product list
-            for (Product product : productList) {
-                // Check if the product category matches the requested type
-                if (product.getCategory().toLowerCase().equals(productType)) {
-                    // Add the matching product to the filtered list
-                    filteredProducts.add(product);
-                }
-            }
-        } else {
-            // If no product type is provided, return the entire list
-            filteredProducts.addAll(productList);
-        }
-
-        // Return the filtered list of products
-        return filteredProducts;
-    }
 
 
 
