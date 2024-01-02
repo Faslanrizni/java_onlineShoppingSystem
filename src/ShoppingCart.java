@@ -219,14 +219,30 @@ public class ShoppingCart extends JFrame {
                 String productId = productDataTable.getValueAt(selectedRow, 0).toString();
                 String productName = productDataTable.getValueAt(selectedRow, 1).toString();
                 String category = productDataTable.getValueAt(selectedRow, 2).toString();
-                double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+                double price = (Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString()));
 
                 // Update the shopping cart items
                 if (shoppingCartItems.containsKey(productId)) {
                     int currentQuantity = shoppingCartItems.get(productId);
                     shoppingCartItems.put(productId, currentQuantity + 1);
+
+                    // Subtract one from the product quantity in the product table
+                    int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
+                    int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
+                    if (currentProductQuantity > 0) {
+                        productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
+                    }
+
                 } else {
                     shoppingCartItems.put(productId, 1);
+
+
+                    // Subtract one from the product quantity in the product table
+                    int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
+                    int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
+                    if (currentProductQuantity > 0) {
+                        productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
+                    }
                 }
 
                 // Check if the product already exists in the cart
@@ -299,6 +315,11 @@ public class ShoppingCart extends JFrame {
                 Electronic electronic = (Electronic) product;
                 extraInformation = "Brand: " + electronic.getBrand() + "\n" +
                         ", warranty period from years: " + electronic.getWarrantyPeriod();
+            }
+
+            // Check if the product is in the shopping cart
+            if (shoppingCartItems.containsKey(productId)) {
+                quantity -= shoppingCartItems.get(productId);
             }
 
             Object[] rowData = {productId, name, category, price, quantity, extraInformation};
