@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ShoppingCart extends JFrame {
+
+    private JLabel totalLabel;
     private static JLabel labelTop, labelBottom;
     private static JPanel panelBottom;
     private static JComboBox<String> categoryComboBox;
@@ -32,7 +34,7 @@ public class ShoppingCart extends JFrame {
         shoppingCartMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
-/*================*/
+
         labelBottom = new JLabel("Selected Product Details                                               ");
         labelBottom.setFont(new Font("", 1, 14));
 
@@ -40,7 +42,10 @@ public class ShoppingCart extends JFrame {
         panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
         panelBottom.add("North", labelBottom);
 
-        /*================*/
+        totalLabel = new JLabel("Total: $0.00");
+        totalLabel.setFont(new Font("", Font.BOLD, 14));
+        panelBottom.add(totalLabel);
+
         labelTop = new JLabel("Select Product Category  ");
         topRow.add(labelTop);
 
@@ -66,27 +71,8 @@ public class ShoppingCart extends JFrame {
                 // Update the labelBottom with selected product details
                 updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
             }
-        });;
-
-
-       /* productDataTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                int selectedRow = productDataTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    String productId = productDataTable.getValueAt(selectedRow, 0).toString();
-                    String productName = productDataTable.getValueAt(selectedRow, 1).toString();
-                    String category = productDataTable.getValueAt(selectedRow, 2).toString();
-                    double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
-                    int quantity = Integer.parseInt(productDataTable.getValueAt(selectedRow, 4).toString());
-                    String extraInformation = productDataTable.getValueAt(selectedRow, 5).toString();
-
-                    // Update the labelBottom with selected product details
-                    updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
-                }
-            }
         });
-*/
+
         categoryComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -136,11 +122,9 @@ public class ShoppingCart extends JFrame {
         panelNorth.add("Center", panelCenter);
 
         panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
         panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        labelBottom = new JLabel("Selected Product Details                                               ");
-        labelBottom.setFont(new Font("", 1, 14));
         panelBottom.add("North", labelBottom);
+        panelBottom.add("Center", totalLabel);
 
         JPanel panelBottomButton = new JPanel(new GridLayout(1, 3));
         JLabel leftLabel = new JLabel();
@@ -172,6 +156,7 @@ public class ShoppingCart extends JFrame {
 
         productModel.fireTableDataChanged();
     }
+
     private void updateSelectedProductDetails(String productId, String productName, String category, double price, int quantity, String extraInformation) {
         labelBottom.setText("<html>Selected Product Details <br>" +
                 "Product ID: " + productId + "<br>" +
@@ -182,32 +167,22 @@ public class ShoppingCart extends JFrame {
                 "Extra Information: " + extraInformation + "</html>");
     }
 
-
     private void openShoppingCartFrame() {
-
-
         if (shoppingCartModel == null) {
             shoppingCartModel = new DefaultTableModel();
-            /*shoppingCartModel = new DefaultTableModel();
-            shoppingCartModel.addColumn("Product ID");
-            shoppingCartModel.addColumn("Name");
-//            shoppingCartModel.addColumn("Category");
-            shoppingCartModel.addColumn("Price");
-            shoppingCartModel.addColumn("Quantity");
-//            shoppingCartModel.addColumn("Extra Information");*/
-
             shoppingCartModel.addColumn("Product Information");
             shoppingCartModel.addColumn("Quantity");
             shoppingCartModel.addColumn("Price");
 
             shoppingCartTable = new JTable(shoppingCartModel);
-
         }
+
         // Check if the shopping cart frame is already open
         if (shoppingCartTable.getParent() == null) {
-            JFrame shoppingCartFrame = new JFrame("Shopping Cart");
+            ShoppingCartFrame shoppingCartFrame = new ShoppingCartFrame("Shopping Cart");
             shoppingCartFrame.setSize(600, 600);
             shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
+            shoppingCartFrame.addTotalLabel(totalLabel);  // Pass the totalLabel to ShoppingCartFrame
             shoppingCartFrame.setVisible(true);
         }
 
@@ -236,7 +211,6 @@ public class ShoppingCart extends JFrame {
                 } else {
                     shoppingCartItems.put(productId, 1);
 
-
                     // Subtract one from the product quantity in the product table
                     int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
                     int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
@@ -244,6 +218,14 @@ public class ShoppingCart extends JFrame {
                         productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
                     }
                 }
+
+                // Calculate total price based on quantity and price
+                double totalPrice = shoppingCartItems.get(productId) * price;
+
+                double sumOfTotalPrice = calculateTotalPrice();
+
+                // Update the total label
+                totalLabel.setText("Total: $" + String.format("%.2f", sumOfTotalPrice));
 
                 // Check if the product already exists in the cart
                 boolean productExists = false;
@@ -253,10 +235,14 @@ public class ShoppingCart extends JFrame {
                         productExists = true;
                         int currentQuantity = (int) shoppingCartModel.getValueAt(i, 1);
                         shoppingCartModel.setValueAt(currentQuantity + 1, i, 1);
+
+                        // Update the total price in the existing row
+                        double currentTotalPrice = (double) shoppingCartModel.getValueAt(i, 2);
+                        shoppingCartModel.setValueAt(totalPrice, i, 2);
+
                         break;
                     }
                 }
-
 
                 // If the product is not in the cart, add a new row
                 if (!productExists) {
@@ -268,10 +254,16 @@ public class ShoppingCart extends JFrame {
         }
         shoppingCartTable.setModel(shoppingCartModel);
         shoppingCartTable.repaint();
-
-//        shoppingCartFrame.setVisible(true);
     }
 
+    private double calculateTotalPrice() {
+        double totalPrice = 0.0;
+        for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+            double price = (double) shoppingCartModel.getValueAt(i, 2);
+            totalPrice += price;
+        }
+        return totalPrice;
+    }
 
     private void filterTable(String selectedProductType) {
         RowFilter<DefaultTableModel, Object> rowFilter = new RowFilter<DefaultTableModel, Object>() {
@@ -327,5 +319,22 @@ public class ShoppingCart extends JFrame {
         }
         productModel.fireTableDataChanged();
     }
+}
 
+class ShoppingCartFrame extends JFrame {
+    private JLabel totalLabel;
+
+    public ShoppingCartFrame(String title) {
+        super(title);
+        // Other initialization...
+    }
+
+    public void addTotalLabel(JLabel totalLabel) {
+        this.totalLabel = totalLabel;
+        JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        panelBottom.add("Center", totalLabel);
+
+        this.add(panelBottom, BorderLayout.SOUTH);
+    }
 }
