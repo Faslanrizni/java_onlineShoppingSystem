@@ -7,11 +7,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ShoppingCart extends JFrame {
-    private static JLabel labelTop,labelBottom;
+    private static JLabel labelTop, labelBottom;
+    private static JPanel panelBottom;
     private static JComboBox<String> categoryComboBox;
-    private static JButton shoppingCartButton,addToCart;
+    private static JButton shoppingCartButton;
     static JTable productDataTable;
     private static DefaultTableModel productModel;
     private static TableRowSorter<DefaultTableModel> sorter;
@@ -19,9 +22,9 @@ public class ShoppingCart extends JFrame {
     private static JTable shoppingCartTable;
     private static DefaultTableModel shoppingCartModel;
 
+    private static Map<String, Integer> shoppingCartItems;  // Map to store product ID and quantity
 
     public ShoppingCart() {
-
         JFrame shoppingCartMain = new JFrame();
         shoppingCartMain.setSize(600, 600);
         JPanel panelNorth = new JPanel(new GridLayout(3, 1));
@@ -29,27 +32,61 @@ public class ShoppingCart extends JFrame {
         shoppingCartMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
+/*================*/
+        labelBottom = new JLabel("Selected Product Details                                               ");
+        labelBottom.setFont(new Font("", 1, 14));
 
+        panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        panelBottom.add("North", labelBottom);
 
-
-
-        /*===========================================NORTH==================================================*/
-
-        /*============================*/
+        /*================*/
         labelTop = new JLabel("Select Product Category  ");
         topRow.add(labelTop);
-        /*============================*/
-
-
-        /*========dropDown for select product type==========*/
 
         String[] productTypes = {"Clothing", "Electronic", "All"};
-
         categoryComboBox = new JComboBox<>(productTypes);
         categoryComboBox.setPreferredSize(new Dimension(150, 50));
         categoryComboBox.setSelectedIndex(2);
         topRow.add(categoryComboBox);
 
+        productDataTable = new JTable(productModel);
+        productDataTable.setPreferredScrollableViewportSize(new Dimension(100, 150));
+
+        productDataTable.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = productDataTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+                String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+                String category = productDataTable.getValueAt(selectedRow, 2).toString();
+                double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+                int quantity = Integer.parseInt(productDataTable.getValueAt(selectedRow, 4).toString());
+                String extraInformation = productDataTable.getValueAt(selectedRow, 5).toString();
+
+                // Update the labelBottom with selected product details
+                updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
+            }
+        });;
+
+
+       /* productDataTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int selectedRow = productDataTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+                    String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+                    String category = productDataTable.getValueAt(selectedRow, 2).toString();
+                    double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+                    int quantity = Integer.parseInt(productDataTable.getValueAt(selectedRow, 4).toString());
+                    String extraInformation = productDataTable.getValueAt(selectedRow, 5).toString();
+
+                    // Update the labelBottom with selected product details
+                    updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
+                }
+            }
+        });
+*/
         categoryComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -58,15 +95,8 @@ public class ShoppingCart extends JFrame {
             }
         });
 
-
-
-
         panelNorth.add("North", topRow);
-        /*===========================================NORTH==================================================*/
 
-
-
-        /*========================================CENTER=======================================*/
         JPanel panelCenter = new JPanel(new BorderLayout());
         int horizontalPadding = 5;
         panelCenter.setBorder(BorderFactory.createEmptyBorder(0, horizontalPadding, 0, horizontalPadding));
@@ -79,10 +109,23 @@ public class ShoppingCart extends JFrame {
         productModel.addColumn("Quantity");
         productModel.addColumn("Extra Information");
 
-
-
         productDataTable = new JTable(productModel);
         productDataTable.setPreferredScrollableViewportSize(new Dimension(100, 150));
+
+        productDataTable.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = productDataTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+                String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+                String category = productDataTable.getValueAt(selectedRow, 2).toString();
+                double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+                int quantity = Integer.parseInt(productDataTable.getValueAt(selectedRow, 4).toString());
+                String extraInformation = productDataTable.getValueAt(selectedRow, 5).toString();
+
+                // Update the labelBottom with selected product details
+                updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(productDataTable);
         panelCenter.add(scrollPane, BorderLayout.CENTER);
@@ -92,66 +135,27 @@ public class ShoppingCart extends JFrame {
 
         panelNorth.add("Center", panelCenter);
 
-        /*========================================CENTER=======================================*/
+        panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
         labelBottom = new JLabel("Selected Product Details                                               ");
         labelBottom.setFont(new Font("", 1, 14));
         panelBottom.add("North", labelBottom);
 
-
         JPanel panelBottomButton = new JPanel(new GridLayout(1, 3));
         JLabel leftLabel = new JLabel();
         panelBottomButton.add(leftLabel);
 
-        /*=============updating the selected row in below============================================*/
-        productDataTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {
-                    // When the selection changes, update the description
-                    int selectedRow = productDataTable.getSelectedRow();
-                    if (selectedRow != -1) {
-                        // Get the data from the selected row
-                        String productId = (String) productModel.getValueAt(selectedRow, 0);
-                        String productName = (String) productModel.getValueAt(selectedRow, 1);
-                        String category = (String) productModel.getValueAt(selectedRow, 2);
-                        double price = (double) productModel.getValueAt(selectedRow, 3);
-                        int quantity = (int) productModel.getValueAt(selectedRow, 4);
-                        String extraInformation = (String) productModel.getValueAt(selectedRow, 5);
-
-                        // Update the labelBottom with the selected product details
-                        updateSelectedProductDetails(productId, productName, category, price, quantity, extraInformation);
-                    }
-                }
-            }
-
-
-        });
-        /*=============updating the selected row in below============================================*/
-
-        /*==========shopping cart button===========*/
         shoppingCartButton = new JButton("Shopping Cart");
         JLabel gap = new JLabel();
         topRow.add(gap);
         shoppingCartButton.setSize(600, 600);
         panelBottomButton.add(shoppingCartButton);
         topRow.setPreferredSize(new Dimension(200, 100));
-        /*==========shopping cart button===========*/
-
-
-       /* *//*==========shopping cart button===========*//*
-        shoppingCartButton = new JButton("Shopping Cart");
-        shoppingCartButton.setSize(300, 50);
-        topRow.add(shoppingCartButton);
-        topRow.setPreferredSize(new Dimension(200, 100));*/
 
         shoppingCartButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Open a new frame for the shopping cart
                 openShoppingCartFrame();
             }
         });
@@ -161,21 +165,28 @@ public class ShoppingCart extends JFrame {
         panelBottom.add("South", panelBottomButton);
 
         panelNorth.add("South", panelBottom);
-
         shoppingCartMain.add(panelNorth);
-
-        /*=====================*/
-
-        /*=====================*/
-
-
         shoppingCartMain.setVisible(true);
+
+        shoppingCartItems = new HashMap<>();  // Initialize the shopping cart items
+
+        productModel.fireTableDataChanged();
     }
+    private void updateSelectedProductDetails(String productId, String productName, String category, double price, int quantity, String extraInformation) {
+        labelBottom.setText("<html>Selected Product Details <br>" +
+                "Product ID: " + productId + "<br>" +
+                "Product Name: " + productName + "<br>" +
+                "Category: " + category + "<br>" +
+                "Price: " + price + "<br>" +
+                "Items available : " + quantity + "<br>" +
+                "Extra Information: " + extraInformation + "</html>");
+    }
+
+
     private void openShoppingCartFrame() {
         JFrame shoppingCartFrame = new JFrame("Shopping Cart");
         shoppingCartFrame.setSize(400, 300);
 
-        // Initialize the shopping cart table and model
         shoppingCartModel = new DefaultTableModel();
         shoppingCartModel.addColumn("Product ID");
         shoppingCartModel.addColumn("Name");
@@ -187,72 +198,56 @@ public class ShoppingCart extends JFrame {
         shoppingCartTable = new JTable(shoppingCartModel);
         shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
 
-        // Get the selected row from the product data table
         int selectedRow = productDataTable.getSelectedRow();
 
-        // Check if a row is selected
         if (selectedRow != -1) {
-            // Get the selected product details
             String productId = productDataTable.getValueAt(selectedRow, 0).toString();
             String productName = productDataTable.getValueAt(selectedRow, 1).toString();
             String category = productDataTable.getValueAt(selectedRow, 2).toString();
             double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
-            int quantity = Integer.parseInt(productDataTable.getValueAt(selectedRow, 4).toString());
-            String extraInformation = productDataTable.getValueAt(selectedRow, 5).toString();
 
-            // Add the selected product to the shopping cart
-            Object[] rowData = {productId, productName, category, price, quantity, extraInformation};
+            // Update the shopping cart items
+            if (shoppingCartItems.containsKey(productId)) {
+                int currentQuantity = shoppingCartItems.get(productId);
+                shoppingCartItems.put(productId, currentQuantity + 1);
+            } else {
+                shoppingCartItems.put(productId, 1);
+            }
+
+            Object[] rowData = {productId, productName, category, price, shoppingCartItems.get(productId), "Extra Info"};
             shoppingCartModel.addRow(rowData);
         }
 
         shoppingCartFrame.setVisible(true);
     }
-    private void updateSelectedProductDetails(String productId, String productName, String category, double price, int quantity, String extraInformation) {
-        labelBottom.setText("<html>Selected Product Details <br>"+
-                "Product ID: " + productId + "<br>" +
-                "Product Name: " + productName + "<br>" +
-                "Category: " + category + "<br>" +
-                "Price: " + price + "<br>" +
-                "Items available : " + quantity + "<br>" +
-                "Extra Information: " + extraInformation+"</html>");
-    }
-    /*html tags allows to  formatting the text displayed in the JLabel*/
 
-    /*=================table sort==================================================*/
     private void filterTable(String selectedProductType) {
         RowFilter<DefaultTableModel, Object> rowFilter = new RowFilter<DefaultTableModel, Object>() {
             @Override
             public boolean include(Entry<? extends DefaultTableModel, ? extends Object> entry) {
-                // Customize the filtering logic based on the selected product type
                 if ("All".equals(selectedProductType)) {
-                    return true; // Show all rows
+                    return true;
                 }
 
-                String category = (String) entry.getValue(2); // Assuming category is at index 2
+                String category = (String) entry.getValue(2);
                 if ("Electronic".equals(selectedProductType)) {
                     return "Electronic".equals(category);
                 } else if ("Clothing".equals(selectedProductType)) {
                     return "Clothing".equals(category);
                 } else {
-
                     return false;
                 }
             }
         };
 
-        // Apply the filter
         sorter.setRowFilter(rowFilter);
     }
 
-    /*=================table sort==================================================*/
-
-
-    //  method to update the JTable with new product data
     public static void updateProductTable(ArrayList<Product> productList) {
         DefaultTableModel productModel = (DefaultTableModel) productDataTable.getModel();
         productModel.setRowCount(0);
 
-        for (Product product : WestMinisterShoppingManager.getProductList()) {
+        for (Product product : productList) {
             String extraInformation = "";
             String productId = product.getProductId();
             String name = product.getProductName();
@@ -262,18 +257,18 @@ public class ShoppingCart extends JFrame {
             if (product instanceof Clothing) {
                 Clothing clothing = (Clothing) product;
                 extraInformation =
-                        ", Color: " + clothing.getColor() +"\n"+
-                        ", Size: " + clothing.getSize();
+                        ", Color: " + clothing.getColor() + "\n" +
+                                ", Size: " + clothing.getSize();
             } else if (product instanceof Electronic) {
                 Electronic electronic = (Electronic) product;
-                extraInformation = "Brand: " + electronic.getBrand() +"\n"+
+                extraInformation = "Brand: " + electronic.getBrand() + "\n" +
                         ", warranty period from years: " + electronic.getWarrantyPeriod();
             }
 
-
-            Object[] rowData = {productId, name, category, price, quantity,extraInformation};
+            Object[] rowData = {productId, name, category, price, quantity, extraInformation};
             productModel.addRow(rowData);
         }
-        productModel.fireTableDataChanged(); /*use fireTableDataChanged() to inform the observers to refresh and display the updated information.*/
+        productModel.fireTableDataChanged();
     }
+
 }
