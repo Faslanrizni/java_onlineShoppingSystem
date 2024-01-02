@@ -184,18 +184,22 @@ public class ShoppingCart extends JFrame {
 
 
     private void openShoppingCartFrame() {
+
+
+        if (shoppingCartModel == null) {
+            shoppingCartModel = new DefaultTableModel();
+            shoppingCartModel.addColumn("Product ID");
+            shoppingCartModel.addColumn("Name");
+            shoppingCartModel.addColumn("Category");
+            shoppingCartModel.addColumn("Price");
+            shoppingCartModel.addColumn("Quantity");
+            shoppingCartModel.addColumn("Extra Information");
+
+            shoppingCartTable = new JTable(shoppingCartModel);
+
+        }
         JFrame shoppingCartFrame = new JFrame("Shopping Cart");
         shoppingCartFrame.setSize(400, 300);
-
-        shoppingCartModel = new DefaultTableModel();
-        shoppingCartModel.addColumn("Product ID");
-        shoppingCartModel.addColumn("Name");
-        shoppingCartModel.addColumn("Category");
-        shoppingCartModel.addColumn("Price");
-        shoppingCartModel.addColumn("Quantity");
-        shoppingCartModel.addColumn("Extra Information");
-
-        shoppingCartTable = new JTable(shoppingCartModel);
         shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
 
         int selectedRow = productDataTable.getSelectedRow();
@@ -214,12 +218,27 @@ public class ShoppingCart extends JFrame {
                 shoppingCartItems.put(productId, 1);
             }
 
-            Object[] rowData = {productId, productName, category, price, shoppingCartItems.get(productId), "Extra Info"};
-            shoppingCartModel.addRow(rowData);
+            // Check if the product already exists in the cart
+            boolean productExists = false;
+            for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+                if (productId.equals(shoppingCartModel.getValueAt(i, 0))) {
+                    productExists = true;
+                    int currentQuantity = (int) shoppingCartModel.getValueAt(i, 4);
+                    shoppingCartModel.setValueAt(currentQuantity + 1, i, 4);
+                    break;
+                }
+            }
+
+            // If the product is not in the cart, add a new row
+            if (!productExists) {
+                Object[] rowData = {productId, productName, category, price, shoppingCartItems.get(productId), "Extra Info"};
+                shoppingCartModel.addRow(rowData);
+            }
         }
 
         shoppingCartFrame.setVisible(true);
     }
+
 
     private void filterTable(String selectedProductType) {
         RowFilter<DefaultTableModel, Object> rowFilter = new RowFilter<DefaultTableModel, Object>() {

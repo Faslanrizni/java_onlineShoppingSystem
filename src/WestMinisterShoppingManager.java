@@ -460,6 +460,7 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
       return userOptions;
     }
 
+
     public static void main(String[] args) throws IOException {
         MainOption();
     }
