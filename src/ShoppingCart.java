@@ -188,55 +188,72 @@ public class ShoppingCart extends JFrame {
 
         if (shoppingCartModel == null) {
             shoppingCartModel = new DefaultTableModel();
+            /*shoppingCartModel = new DefaultTableModel();
             shoppingCartModel.addColumn("Product ID");
             shoppingCartModel.addColumn("Name");
-            shoppingCartModel.addColumn("Category");
+//            shoppingCartModel.addColumn("Category");
             shoppingCartModel.addColumn("Price");
             shoppingCartModel.addColumn("Quantity");
-            shoppingCartModel.addColumn("Extra Information");
+//            shoppingCartModel.addColumn("Extra Information");*/
+
+            shoppingCartModel.addColumn("Product Information");
+            shoppingCartModel.addColumn("Quantity");
+            shoppingCartModel.addColumn("Price");
 
             shoppingCartTable = new JTable(shoppingCartModel);
 
         }
-        JFrame shoppingCartFrame = new JFrame("Shopping Cart");
-        shoppingCartFrame.setSize(400, 300);
-        shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
-
-        int selectedRow = productDataTable.getSelectedRow();
-
-        if (selectedRow != -1) {
-            String productId = productDataTable.getValueAt(selectedRow, 0).toString();
-            String productName = productDataTable.getValueAt(selectedRow, 1).toString();
-            String category = productDataTable.getValueAt(selectedRow, 2).toString();
-            double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
-
-            // Update the shopping cart items
-            if (shoppingCartItems.containsKey(productId)) {
-                int currentQuantity = shoppingCartItems.get(productId);
-                shoppingCartItems.put(productId, currentQuantity + 1);
-            } else {
-                shoppingCartItems.put(productId, 1);
-            }
-
-            // Check if the product already exists in the cart
-            boolean productExists = false;
-            for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
-                if (productId.equals(shoppingCartModel.getValueAt(i, 0))) {
-                    productExists = true;
-                    int currentQuantity = (int) shoppingCartModel.getValueAt(i, 4);
-                    shoppingCartModel.setValueAt(currentQuantity + 1, i, 4);
-                    break;
-                }
-            }
-
-            // If the product is not in the cart, add a new row
-            if (!productExists) {
-                Object[] rowData = {productId, productName, category, price, shoppingCartItems.get(productId), "Extra Info"};
-                shoppingCartModel.addRow(rowData);
-            }
+        // Check if the shopping cart frame is already open
+        if (shoppingCartTable.getParent() == null) {
+            JFrame shoppingCartFrame = new JFrame("Shopping Cart");
+            shoppingCartFrame.setSize(600, 600);
+            shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
+            shoppingCartFrame.setVisible(true);
         }
 
-        shoppingCartFrame.setVisible(true);
+        // Check if productDataTable is not null
+        if (productDataTable != null) {
+            int selectedRow = productDataTable.getSelectedRow();
+
+            if (selectedRow != -1) {
+                String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+                String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+                String category = productDataTable.getValueAt(selectedRow, 2).toString();
+                double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+
+                // Update the shopping cart items
+                if (shoppingCartItems.containsKey(productId)) {
+                    int currentQuantity = shoppingCartItems.get(productId);
+                    shoppingCartItems.put(productId, currentQuantity + 1);
+                } else {
+                    shoppingCartItems.put(productId, 1);
+                }
+
+                // Check if the product already exists in the cart
+                boolean productExists = false;
+                for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+                    String existingProductId = shoppingCartModel.getValueAt(i, 0).toString().split(" - ")[0];
+                    if (productId.equals(existingProductId)) {
+                        productExists = true;
+                        int currentQuantity = (int) shoppingCartModel.getValueAt(i, 1);
+                        shoppingCartModel.setValueAt(currentQuantity + 1, i, 1);
+                        break;
+                    }
+                }
+
+
+                // If the product is not in the cart, add a new row
+                if (!productExists) {
+                    String productInformation = productId + " - " + productName + " (" + category + ")";
+                    Object[] rowData = {productInformation, shoppingCartItems.get(productId), price};
+                    shoppingCartModel.addRow(rowData);
+                }
+            }
+        }
+        shoppingCartTable.setModel(shoppingCartModel);
+        shoppingCartTable.repaint();
+
+//        shoppingCartFrame.setVisible(true);
     }
 
 
