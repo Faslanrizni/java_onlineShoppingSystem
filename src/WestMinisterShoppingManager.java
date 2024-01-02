@@ -6,11 +6,14 @@ import java.util.*;
 
 
 public  class WestMinisterShoppingManager implements ShoppingManager {
+    private static ArrayList<Product> productList = new ArrayList<>();/*can be accessed across instances*/
+
+
     public static ArrayList<Product> getProductList() {
         return productList;
     }
 
-    private static ArrayList<Product> productList = new ArrayList<>();/*can be accessed across instances*/
+
     private static final ArrayList<Product> ExtraIntoProductList = new ArrayList<>();/*can be accessed across instances*/
 
     public WestMinisterShoppingManager(ArrayList<Product> productList) {
@@ -239,18 +242,21 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
 
                     case 2:
                         Electronic electronic = new Electronic();
-                        electronic.setCategory("Electronic");
+//                        electronic.setCategory("Electronic");
 
                         System.out.println("Enter the brand ");
                         String brand = input.nextLine();
-                        electronic.setBrand(brand);
+//                        electronic.setBrand(brand);
                         input.nextLine();
 
                         System.out.println("Enter the warranty period from years");
                         int warrantyPeriod = input.nextInt();
-                        electronic.setWarrantyPeriod(warrantyPeriod);
+//                        electronic.setWarrantyPeriod(warrantyPeriod);
 
                         Electronic e = new Electronic(productId,productName,productPrice,quantity,brand,warrantyPeriod);
+//                        e.setCategory("Electronic");
+//                        e.setWarrantyPeriod(warrantyPeriod);
+//                        e.setBrand(brand);
                         Electronic electronicExtraInfo = new Electronic(brand,warrantyPeriod);
                         this.addProduct(e);
                 }
@@ -453,9 +459,6 @@ public  class WestMinisterShoppingManager implements ShoppingManager {
         }
       return userOptions;
     }
-
-
-
 
 
     public static void main(String[] args) throws IOException {

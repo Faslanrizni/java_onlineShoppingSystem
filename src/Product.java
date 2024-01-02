@@ -6,6 +6,7 @@ abstract class Product {
     private String category;
 
     public Product() {
+
     }
 
     public Product(String productId, String productName, double price, int quantity, String category) {

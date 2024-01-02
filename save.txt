@@ -3,4 +3,4 @@ product Name apple
 product Price100.0
 product Quantity 10
 Product Size  XXL
-Product color  red
+Product color  

@@ -16,6 +16,10 @@ public class ShoppingCart extends JFrame {
     private static DefaultTableModel productModel;
     private static TableRowSorter<DefaultTableModel> sorter;
 
+    private static JTable shoppingCartTable;
+    private static DefaultTableModel shoppingCartModel;
+
+
     public ShoppingCart() {
 
         JFrame shoppingCartMain = new JFrame();
@@ -53,27 +57,6 @@ public class ShoppingCart extends JFrame {
                 filterTable(selectedProductType);
             }
         });
-
-        /*========dropDown for select product type==========*/
-        /*categoryComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selectedProductType = (String) categoryComboBox.getSelectedItem();
-                WestMinisterShoppingManager manager = new WestMinisterShoppingManager();
-                ArrayList<Product> productList = manager.getProductList(selectedProductType);
-                updateProductTable(productList);
-            }
-        });*/
-
-
-        /*==========shopping cart button===========*/
-        shoppingCartButton = new JButton("Shopping Cart");
-        JLabel gap = new JLabel();
-        topRow.add(gap);
-        shoppingCartButton.setSize(300, 50);
-        topRow.add(shoppingCartButton);
-        topRow.setPreferredSize(new Dimension(200, 100));
-        /*==========shopping cart button===========*/
 
 
 
@@ -149,9 +132,29 @@ public class ShoppingCart extends JFrame {
         });
         /*=============updating the selected row in below============================================*/
 
-        addToCart = new JButton("Add to Shopping Cart");
-        addToCart.setMinimumSize(new Dimension(150, 30));
-        panelBottomButton.add(addToCart);
+        /*==========shopping cart button===========*/
+        shoppingCartButton = new JButton("Shopping Cart");
+        JLabel gap = new JLabel();
+        topRow.add(gap);
+        shoppingCartButton.setSize(600, 600);
+        panelBottomButton.add(shoppingCartButton);
+        topRow.setPreferredSize(new Dimension(200, 100));
+        /*==========shopping cart button===========*/
+
+
+       /* *//*==========shopping cart button===========*//*
+        shoppingCartButton = new JButton("Shopping Cart");
+        shoppingCartButton.setSize(300, 50);
+        topRow.add(shoppingCartButton);
+        topRow.setPreferredSize(new Dimension(200, 100));*/
+
+        shoppingCartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Open a new frame for the shopping cart
+                openShoppingCartFrame();
+            }
+        });
 
         JLabel rightLabel = new JLabel();
         panelBottomButton.add(rightLabel);
@@ -161,8 +164,48 @@ public class ShoppingCart extends JFrame {
 
         shoppingCartMain.add(panelNorth);
 
+        /*=====================*/
+
+        /*=====================*/
+
 
         shoppingCartMain.setVisible(true);
+    }
+    private void openShoppingCartFrame() {
+        JFrame shoppingCartFrame = new JFrame("Shopping Cart");
+        shoppingCartFrame.setSize(400, 300);
+
+        // Initialize the shopping cart table and model
+        shoppingCartModel = new DefaultTableModel();
+        shoppingCartModel.addColumn("Product ID");
+        shoppingCartModel.addColumn("Name");
+        shoppingCartModel.addColumn("Category");
+        shoppingCartModel.addColumn("Price");
+        shoppingCartModel.addColumn("Quantity");
+        shoppingCartModel.addColumn("Extra Information");
+
+        shoppingCartTable = new JTable(shoppingCartModel);
+        shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
+
+        // Get the selected row from the product data table
+        int selectedRow = productDataTable.getSelectedRow();
+
+        // Check if a row is selected
+        if (selectedRow != -1) {
+            // Get the selected product details
+            String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+            String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+            String category = productDataTable.getValueAt(selectedRow, 2).toString();
+            double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+            int quantity = Integer.parseInt(productDataTable.getValueAt(selectedRow, 4).toString());
+            String extraInformation = productDataTable.getValueAt(selectedRow, 5).toString();
+
+            // Add the selected product to the shopping cart
+            Object[] rowData = {productId, productName, category, price, quantity, extraInformation};
+            shoppingCartModel.addRow(rowData);
+        }
+
+        shoppingCartFrame.setVisible(true);
     }
     private void updateSelectedProductDetails(String productId, String productName, String category, double price, int quantity, String extraInformation) {
         labelBottom.setText("<html>Selected Product Details <br>"+
@@ -170,7 +213,7 @@ public class ShoppingCart extends JFrame {
                 "Product Name: " + productName + "<br>" +
                 "Category: " + category + "<br>" +
                 "Price: " + price + "<br>" +
-                "Quantity: " + quantity + "<br>" +
+                "Items available : " + quantity + "<br>" +
                 "Extra Information: " + extraInformation+"</html>");
     }
     /*html tags allows to  formatting the text displayed in the JLabel*/
