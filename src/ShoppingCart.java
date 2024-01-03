@@ -27,24 +27,20 @@ public class ShoppingCart extends JFrame {
     private static Map<String, Integer> shoppingCartItems;  // Map to store product ID and quantity
 
     public ShoppingCart() {
+
         JFrame shoppingCartMain = new JFrame();
         shoppingCartMain.setSize(600, 600);
-        JPanel panelNorth = new JPanel(new GridLayout(3, 1));
+
+
+        /*=============================================*/JPanel panelNorth = new JPanel(new GridLayout(3, 1));/*=========================================*/
+
+
         shoppingCartMain.setTitle("Westminster Shopping Center");
         shoppingCartMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
 
-        labelBottom = new JLabel("Selected Product Details                                               ");
-        labelBottom.setFont(new Font("", 1, 14));
-
-        panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        panelBottom.add("North", labelBottom);
-
-        totalLabel = new JLabel("Total: $0.00");
-        totalLabel.setFont(new Font("", Font.BOLD, 14));
-        panelBottom.add(totalLabel);
+        /*===============================Top row of Westminster Shopping Center ===================================*/
 
         labelTop = new JLabel("Select Product Category  ");
         topRow.add(labelTop);
@@ -54,6 +50,17 @@ public class ShoppingCart extends JFrame {
         categoryComboBox.setPreferredSize(new Dimension(150, 50));
         categoryComboBox.setSelectedIndex(2);
         topRow.add(categoryComboBox);
+
+
+        /*================================Top row of Westminster Shopping Center ===================================================*/
+
+
+
+        totalLabel = new JLabel("Total: $0.00");
+        totalLabel.setFont(new Font("", Font.BOLD, 14));
+//        panelBottom.add(totalLabel);
+
+
 
         productDataTable = new JTable(productModel);
         productDataTable.setPreferredScrollableViewportSize(new Dimension(100, 150));
@@ -83,7 +90,9 @@ public class ShoppingCart extends JFrame {
 
         panelNorth.add("North", topRow);
 
-        JPanel panelCenter = new JPanel(new BorderLayout());
+        /*=======================panel center of westminsterShopping center===============================================*/
+
+        /*===========================================================*/JPanel panelCenter = new JPanel(new BorderLayout());/*================================*/
         int horizontalPadding = 5;
         panelCenter.setBorder(BorderFactory.createEmptyBorder(0, horizontalPadding, 0, horizontalPadding));
 
@@ -121,21 +130,40 @@ public class ShoppingCart extends JFrame {
 
         panelNorth.add("Center", panelCenter);
 
-        panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        /*======================================*/JPanel panelBottom = new JPanel();/*=======================================*/
+        BoxLayout boxLayout = new BoxLayout(panelBottom, BoxLayout.Y_AXIS);
+        panelBottom.setLayout(boxLayout);
+
+        labelBottom = new JLabel("Selected Product Details                                               ");
+        labelBottom.setFont(new Font("", 1, 14));
+
         panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        panelBottom.add("North", labelBottom);
-        panelBottom.add("Center", totalLabel);
+        panelBottom.add(labelBottom);
 
-        JPanel panelBottomButton = new JPanel(new GridLayout(1, 3));
-        JLabel leftLabel = new JLabel();
-        panelBottomButton.add(leftLabel);
+// Create a new panel for the product details and set its layout to FlowLayout with left alignment
+        JPanel productDetailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        productDetailsPanel.add(labelBottom);
 
-        shoppingCartButton = new JButton("Shopping Cart");
-        JLabel gap = new JLabel();
-        topRow.add(gap);
-        shoppingCartButton.setSize(600, 600);
-        panelBottomButton.add(shoppingCartButton);
-        topRow.setPreferredSize(new Dimension(200, 100));
+// Add productDetailsPanel to panelBottom
+        panelBottom.add(productDetailsPanel);
+
+// Create a new panel for the button and set its layout to FlowLayout with center alignment
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        shoppingCartButton = new JButton("Add to Shopping Cart");
+        buttonPanel.add(shoppingCartButton);
+
+// Add buttonPanel to panelBottom and set alignment to center
+        panelBottom.add(Box.createVerticalGlue());  // To push the button to the bottom
+        panelBottom.add(buttonPanel);
+        panelBottom.add(Box.createVerticalGlue());  // To push the button to the center
+
+        panelNorth.add("South", panelBottom);
+        shoppingCartMain.add(panelNorth);
+        shoppingCartMain.setVisible(true);
+
+
+
+
 
         shoppingCartButton.addActionListener(new ActionListener() {
             @Override
@@ -144,13 +172,8 @@ public class ShoppingCart extends JFrame {
             }
         });
 
-        JLabel rightLabel = new JLabel();
-        panelBottomButton.add(rightLabel);
-        panelBottom.add("South", panelBottomButton);
 
-        panelNorth.add("South", panelBottom);
-        shoppingCartMain.add(panelNorth);
-        shoppingCartMain.setVisible(true);
+
 
         shoppingCartItems = new HashMap<>();  // Initialize the shopping cart items
 
@@ -183,6 +206,11 @@ public class ShoppingCart extends JFrame {
             shoppingCartFrame.setSize(600, 600);
             shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
             shoppingCartFrame.addTotalLabel(totalLabel);  // Pass the totalLabel to ShoppingCartFrame
+
+            // Set the table model and repaint
+            shoppingCartTable.setModel(shoppingCartModel);
+            shoppingCartTable.repaint();
+
             shoppingCartFrame.setVisible(true);
         }
 
@@ -219,14 +247,6 @@ public class ShoppingCart extends JFrame {
                     }
                 }
 
-                // Calculate total price based on quantity and price
-                double totalPrice = shoppingCartItems.get(productId) * price;
-
-                double sumOfTotalPrice = calculateTotalPrice();
-
-                // Update the total label
-                totalLabel.setText("Total: $" + String.format("%.2f", sumOfTotalPrice));
-
                 // Check if the product already exists in the cart
                 boolean productExists = false;
                 for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
@@ -238,6 +258,7 @@ public class ShoppingCart extends JFrame {
 
                         // Update the total price in the existing row
                         double currentTotalPrice = (double) shoppingCartModel.getValueAt(i, 2);
+                        double totalPrice = shoppingCartItems.get(productId) * price;
                         shoppingCartModel.setValueAt(totalPrice, i, 2);
 
                         break;
@@ -250,11 +271,19 @@ public class ShoppingCart extends JFrame {
                     Object[] rowData = {productInformation, shoppingCartItems.get(productId), price};
                     shoppingCartModel.addRow(rowData);
                 }
+
+                shoppingCartTable.setModel(shoppingCartModel);
+                shoppingCartTable.repaint();
+
+                // Calculate total price based on quantity and price
+                double totalPrice = calculateTotalPrice();
+
+                // Update the total label
+                totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
             }
         }
-        shoppingCartTable.setModel(shoppingCartModel);
-        shoppingCartTable.repaint();
     }
+
 
     private double calculateTotalPrice() {
         double totalPrice = 0.0;
@@ -326,13 +355,13 @@ class ShoppingCartFrame extends JFrame {
 
     public ShoppingCartFrame(String title) {
         super(title);
-        // Other initialization...
+
     }
 
     public void addTotalLabel(JLabel totalLabel) {
         this.totalLabel = totalLabel;
         JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelBottom.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        panelBottom.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelBottom.add("Center", totalLabel);
 
         this.add(panelBottom, BorderLayout.SOUTH);
