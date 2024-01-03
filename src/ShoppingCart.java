@@ -20,10 +20,8 @@ public class ShoppingCart extends JFrame {
     static JTable productDataTable;
     private static DefaultTableModel productModel;
     private static TableRowSorter<DefaultTableModel> sorter;
-
     private static JTable shoppingCartTable;
     private static DefaultTableModel shoppingCartModel;
-
     private static Map<String, Integer> shoppingCartItems;  // Map to store product ID and quantity
 
     public ShoppingCart() {
@@ -191,6 +189,9 @@ public class ShoppingCart extends JFrame {
     }
 
     private void openShoppingCartFrame() {
+
+
+
         if (shoppingCartModel == null) {
             shoppingCartModel = new DefaultTableModel();
             shoppingCartModel.addColumn("Product Information");
@@ -278,6 +279,51 @@ public class ShoppingCart extends JFrame {
                 // Calculate total price based on quantity and price
                 double totalPrice = calculateTotalPrice();
 
+                // Calculate discounts and final total
+                double firstPurchaseDiscount = 0.0;
+                double categoryDiscount = 0.0;
+
+                // Check if it's the user's first purchase
+                if (shoppingCartItems.isEmpty()) {
+                    firstPurchaseDiscount = 0.10; // 10% first purchase discount
+                }
+
+                // Check if there are at least three products of the same category
+                // Check if there are at least three products of the same category
+                if (productDataTable != null) {
+                    String selectedCategory = productDataTable.getValueAt(selectedRow, 2).toString();
+                    int categoryCount = 0;
+
+                    for (int i = 0; i < productDataTable.getRowCount(); i++) {
+                        String categoryOf = productDataTable.getValueAt(i, 2).toString();
+                        if (selectedCategory.equals(categoryOf)) {
+                            categoryCount++;
+                            if (categoryCount >= 3) {
+                                categoryDiscount = 0.20; // 20% discount for buying at least three products of the same category
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Calculate final total after applying discounts
+                double totalDiscount = firstPurchaseDiscount + categoryDiscount;
+                double discountedAmount = totalPrice * totalDiscount;
+                double finalTotal = totalPrice - discountedAmount;
+
+                // Display discounts and final total below the shopping cart table
+                String discountsText = String.format("Discounts:\nFirst Purchase Discount: %.2f%%\nCategory Discount: %.2f%%\n", firstPurchaseDiscount * 100, categoryDiscount * 100);
+                String finalTotalText = String.format("Final Total: $%.2f (%.2f%% off)", finalTotal, totalDiscount * 100);
+
+                // Display selected details below the shopping cart table
+                String selectedDetails = labelBottom.getText();
+                labelBottom.setText(selectedDetails + "\n\n" + discountsText + "\n" + finalTotalText);
+
+                totalLabel.setText("Total: $" + String.format("%.2f", finalTotal));
+
+
+
+
                 // Update the total label
                 totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
             }
@@ -343,7 +389,8 @@ public class ShoppingCart extends JFrame {
                 quantity -= shoppingCartItems.get(productId);
             }
 
-            Object[] rowData = {productId, name, category, price, quantity, extraInformation};
+
+            Object[] rowData = {productId, name, category, price,quantity, extraInformation};
             productModel.addRow(rowData);
         }
         productModel.fireTableDataChanged();
@@ -352,6 +399,7 @@ public class ShoppingCart extends JFrame {
 
 class ShoppingCartFrame extends JFrame {
     private JLabel totalLabel;
+    private JLabel FirstPurchaseDiscount;
 
     public ShoppingCartFrame(String title) {
         super(title);
@@ -361,7 +409,7 @@ class ShoppingCartFrame extends JFrame {
     public void addTotalLabel(JLabel totalLabel) {
         this.totalLabel = totalLabel;
         JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelBottom.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelBottom.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
         panelBottom.add("Center", totalLabel);
 
         this.add(panelBottom, BorderLayout.SOUTH);
