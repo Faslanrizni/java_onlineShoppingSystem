@@ -11,18 +11,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ShoppingCart extends JFrame {
+    private JFrame shoppingCart;
 
-    private JLabel totalLabel;
+    private Map<String, ArrayList<String>> purchaseHistory;  // User ID to list of purchased products
+
+
     private static JLabel labelTop, labelBottom;
     private static JPanel panelBottom;
     private static JComboBox<String> categoryComboBox;
-    private static JButton shoppingCartButton;
+    private static JButton shoppingCartButton,AddToShoppingCartButton;
     static JTable productDataTable;
     private static DefaultTableModel productModel;
     private static TableRowSorter<DefaultTableModel> sorter;
     private static JTable shoppingCartTable;
     private static DefaultTableModel shoppingCartModel;
     private static Map<String, Integer> shoppingCartItems;  // Map to store product ID and quantity
+
+    private JLabel totalLabel;
+    private static JLabel finalTotalLabel;
+    private static JLabel firstPurchaseDiscountLabel;
+    private static JLabel sameCategoryDiscountLabel;
+    private Map<String, Integer> categoryCounts;  // Map to store category and quantity
+
+
 
     public ShoppingCart() {
 
@@ -48,6 +59,74 @@ public class ShoppingCart extends JFrame {
         categoryComboBox.setPreferredSize(new Dimension(150, 50));
         categoryComboBox.setSelectedIndex(2);
         topRow.add(categoryComboBox);
+        shoppingCartButton = new JButton("Shopping Cart");
+        topRow.add(shoppingCartButton);
+
+        shoppingCartButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = productDataTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+                    String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+                    String category = productDataTable.getValueAt(selectedRow, 2).toString();
+                    double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
+
+                    // Update the shopping cart items
+                    if (shoppingCartItems.containsKey(productId)) {
+                        int currentQuantity = shoppingCartItems.get(productId);
+                        shoppingCartItems.put(productId, currentQuantity + 1);
+
+                        // Subtract one from the product quantity in the product table
+                        int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
+                        int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
+                        if (currentProductQuantity > 0) {
+                            productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
+                        }
+
+                    } else {
+                        shoppingCartItems.put(productId, 1);
+
+                        // Subtract one from the product quantity in the product table
+                        int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
+                        int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
+                        if (currentProductQuantity > 0) {
+                            productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
+                        }
+                    }
+
+                    // Check if the product already exists in the cart
+                    boolean productExists = false;
+                    for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+                        String existingProductId = shoppingCartModel.getValueAt(i, 0).toString().split(" - ")[0];
+                        if (productId.equals(existingProductId)) {
+                            productExists = true;
+                            int currentQuantity = (int) shoppingCartModel.getValueAt(i, 1);
+                            shoppingCartModel.setValueAt(currentQuantity + 1, i, 1);
+
+                            // Update the total price in the existing row
+                            double currentTotalPrice = (double) shoppingCartModel.getValueAt(i, 2);
+                            double totalPrice = shoppingCartItems.get(productId) * price;
+                            shoppingCartModel.setValueAt(totalPrice, i, 2);
+
+                            break;
+                        }
+                    }
+
+                    // If the product is not in the cart, add a new row
+                    if (!productExists) {
+                        String productInformation = productId + " - " + productName + " (" + category + ")";
+                        Object[] rowData = {productInformation, shoppingCartItems.get(productId), price};
+                        shoppingCartModel.addRow(rowData);
+                    }
+
+
+
+                    // Update the total label
+                    double totalPrice = calculateTotalPrice();
+                    totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
+                }
+            }
+        });
 
 
         /*================================Top row of Westminster Shopping Center ===================================================*/
@@ -56,7 +135,9 @@ public class ShoppingCart extends JFrame {
 
         totalLabel = new JLabel("Total: $0.00");
         totalLabel.setFont(new Font("", Font.BOLD, 14));
-//        panelBottom.add(totalLabel);
+
+
+
 
 
 
@@ -147,8 +228,8 @@ public class ShoppingCart extends JFrame {
 
 // Create a new panel for the button and set its layout to FlowLayout with center alignment
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        shoppingCartButton = new JButton("Add to Shopping Cart");
-        buttonPanel.add(shoppingCartButton);
+        AddToShoppingCartButton = new JButton("Add to Shopping Cart");
+        buttonPanel.add(AddToShoppingCartButton);
 
 // Add buttonPanel to panelBottom and set alignment to center
         panelBottom.add(Box.createVerticalGlue());  // To push the button to the bottom
@@ -167,6 +248,7 @@ public class ShoppingCart extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openShoppingCartFrame();
+//                applyDiscounts();
             }
         });
 
@@ -174,6 +256,9 @@ public class ShoppingCart extends JFrame {
 
 
         shoppingCartItems = new HashMap<>();  // Initialize the shopping cart items
+        purchaseHistory = new HashMap<>();
+        categoryCounts = new HashMap<>();
+
 
         productModel.fireTableDataChanged();
     }
@@ -189,146 +274,194 @@ public class ShoppingCart extends JFrame {
     }
 
     private void openShoppingCartFrame() {
+        if (shoppingCart == null || !shoppingCart.isVisible()) {
+            shoppingCart = new JFrame("Shopping Cart");
+            shoppingCart.setSize(500, 500);
+
+            if (shoppingCartItems == null) {
+                shoppingCartItems = new HashMap<>();
+            }
+
+            JPanel cartPanel = new JPanel(new GridLayout(2, 1));
+            shoppingCart.add(cartPanel);
+            String[] columns = {"Product", "Quantity", "Price"};
+
+            shoppingCartModel = new DefaultTableModel(columns, 0);
+            JTable cartTable = new JTable(shoppingCartModel);
+            JScrollPane scrollPane = new JScrollPane(cartTable);
+            cartPanel.add(scrollPane, BorderLayout.CENTER);
 
 
 
-        if (shoppingCartModel == null) {
-            shoppingCartModel = new DefaultTableModel();
-            shoppingCartModel.addColumn("Product Information");
-            shoppingCartModel.addColumn("Quantity");
-            shoppingCartModel.addColumn("Price");
+            // Create a new panel for additional labels
+            JPanel labelsPanel = new JPanel();
+            labelsPanel.setLayout(new GridLayout(5, 1));  // Updated layout to GridLayout
 
-            shoppingCartTable = new JTable(shoppingCartModel);
-        }
+            totalLabel = new JLabel("Total: $0.00");
+            labelsPanel.add(totalLabel);
 
-        // Check if the shopping cart frame is already open
-        if (shoppingCartTable.getParent() == null) {
-            ShoppingCartFrame shoppingCartFrame = new ShoppingCartFrame("Shopping Cart");
-            shoppingCartFrame.setSize(600, 600);
-            shoppingCartFrame.getContentPane().add(new JScrollPane(shoppingCartTable));
-            shoppingCartFrame.addTotalLabel(totalLabel);  // Pass the totalLabel to ShoppingCartFrame
 
-            // Set the table model and repaint
-            shoppingCartTable.setModel(shoppingCartModel);
-            shoppingCartTable.repaint();
 
-            shoppingCartFrame.setVisible(true);
-        }
+            firstPurchaseDiscountLabel = new JLabel("First Purchase Discount: 0%");
+            labelsPanel.add(firstPurchaseDiscountLabel);
 
-        // Check if productDataTable is not null
-        if (productDataTable != null) {
-            int selectedRow = productDataTable.getSelectedRow();
+            sameCategoryDiscountLabel = new JLabel("Same Category Discount: 0%");
+            labelsPanel.add(sameCategoryDiscountLabel);
 
-            if (selectedRow != -1) {
-                String productId = productDataTable.getValueAt(selectedRow, 0).toString();
-                String productName = productDataTable.getValueAt(selectedRow, 1).toString();
-                String category = productDataTable.getValueAt(selectedRow, 2).toString();
-                double price = (Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString()));
+            finalTotalLabel = new JLabel("Final Total: $0.00");
+            labelsPanel.add(finalTotalLabel);
 
-                // Update the shopping cart items
-                if (shoppingCartItems.containsKey(productId)) {
-                    int currentQuantity = shoppingCartItems.get(productId);
-                    shoppingCartItems.put(productId, currentQuantity + 1);
+            cartPanel.add(labelsPanel, BorderLayout.SOUTH);  // Set labelsPanel to SOUTH
 
-                    // Subtract one from the product quantity in the product table
-                    int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
-                    int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
-                    if (currentProductQuantity > 0) {
-                        productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
-                    }
+            AddToShoppingCartButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int selectedRow = productDataTable.getSelectedRow();
+                    if (selectedRow != -1) {
+                        String productId = productDataTable.getValueAt(selectedRow, 0).toString();
+                        String productName = productDataTable.getValueAt(selectedRow, 1).toString();
+                        String category = productDataTable.getValueAt(selectedRow, 2).toString();
+                        double price = Double.parseDouble(productDataTable.getValueAt(selectedRow, 3).toString());
 
-                } else {
-                    shoppingCartItems.put(productId, 1);
+                        // Add this before updating the shopping cart model
+                        String categoryInCart = categoryComboBox.getSelectedItem().toString();
+                        categoryCounts.put(categoryInCart, categoryCounts.getOrDefault(categoryInCart, 0) + 1);
 
-                    // Subtract one from the product quantity in the product table
-                    int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
-                    int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
-                    if (currentProductQuantity > 0) {
-                        productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
-                    }
-                }
 
-                // Check if the product already exists in the cart
-                boolean productExists = false;
-                for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
-                    String existingProductId = shoppingCartModel.getValueAt(i, 0).toString().split(" - ")[0];
-                    if (productId.equals(existingProductId)) {
-                        productExists = true;
-                        int currentQuantity = (int) shoppingCartModel.getValueAt(i, 1);
-                        shoppingCartModel.setValueAt(currentQuantity + 1, i, 1);
+                        // Update the shopping cart items
+                        if (shoppingCartItems.containsKey(productId)) {
+                            int currentQuantity = shoppingCartItems.get(productId);
+                            shoppingCartItems.put(productId, currentQuantity + 1);
 
-                        // Update the total price in the existing row
-                        double currentTotalPrice = (double) shoppingCartModel.getValueAt(i, 2);
-                        double totalPrice = shoppingCartItems.get(productId) * price;
-                        shoppingCartModel.setValueAt(totalPrice, i, 2);
+                            // Subtract one from the product quantity in the product table
+                            int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
+                            int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
+                            if (currentProductQuantity > 0) {
+                                productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
+                            }
 
-                        break;
-                    }
-                }
+                        } else {
+                            shoppingCartItems.put(productId, 1);
 
-                // If the product is not in the cart, add a new row
-                if (!productExists) {
-                    String productInformation = productId + " - " + productName + " (" + category + ")";
-                    Object[] rowData = {productInformation, shoppingCartItems.get(productId), price};
-                    shoppingCartModel.addRow(rowData);
-                }
+                            // Subtract one from the product quantity in the product table
+                            int productTableSelectedRow = productDataTable.convertRowIndexToModel(selectedRow);
+                            int currentProductQuantity = (int) productModel.getValueAt(productTableSelectedRow, 4);
+                            if (currentProductQuantity > 0) {
+                                productModel.setValueAt(currentProductQuantity - 1, productTableSelectedRow, 4);
+                            }
+                        }
 
-                shoppingCartTable.setModel(shoppingCartModel);
-                shoppingCartTable.repaint();
+                        // Check if the product already exists in the cart
+                        boolean productExists = false;
+                        for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+                            String existingProductId = shoppingCartModel.getValueAt(i, 0).toString().split(" - ")[0];
+                            if (productId.equals(existingProductId)) {
+                                productExists = true;
+                                int currentQuantity = (int) shoppingCartModel.getValueAt(i, 1);
+                                shoppingCartModel.setValueAt(currentQuantity + 1, i, 1);
 
-                // Calculate total price based on quantity and price
-                double totalPrice = calculateTotalPrice();
+                                // Update the total price in the existing row
+                                double currentTotalPrice = (double) shoppingCartModel.getValueAt(i, 2);
+                                double totalPrice = shoppingCartItems.get(productId) * price;
+                                shoppingCartModel.setValueAt(totalPrice, i, 2);
 
-                // Calculate discounts and final total
-                double firstPurchaseDiscount = 0.0;
-                double categoryDiscount = 0.0;
-
-                // Check if it's the user's first purchase
-                if (shoppingCartItems.isEmpty()) {
-                    firstPurchaseDiscount = 0.10; // 10% first purchase discount
-                }
-
-                // Check if there are at least three products of the same category
-                // Check if there are at least three products of the same category
-                if (productDataTable != null) {
-                    String selectedCategory = productDataTable.getValueAt(selectedRow, 2).toString();
-                    int categoryCount = 0;
-
-                    for (int i = 0; i < productDataTable.getRowCount(); i++) {
-                        String categoryOf = productDataTable.getValueAt(i, 2).toString();
-                        if (selectedCategory.equals(categoryOf)) {
-                            categoryCount++;
-                            if (categoryCount >= 3) {
-                                categoryDiscount = 0.20; // 20% discount for buying at least three products of the same category
                                 break;
                             }
                         }
+
+                        // If the product is not in the cart, add a new row
+                        if (!productExists) {
+                            String productInformation = productId + " - " + productName + " (" + category + ")";
+                            Object[] rowData = {productInformation, shoppingCartItems.get(productId), price};
+                            shoppingCartModel.addRow(rowData);
+                        }
+
+                        // Update the total label
+                        double totalPrice = calculateTotalPrice();
+                        totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
+
+                        firstPurchaseDiscountLabel.setText("First purchase discount(10%): ");
+
+                        double sameCategory = SameCategoryDiscount(calculateTotalPrice());
+                        sameCategoryDiscountLabel.setText("Three items in same category discount(20%): " +"-"+sameCategory);
+                        finalTotalLabel.setText("final Total: " +(calculateTotalPrice()-sameCategory));
+
                     }
                 }
-
-                // Calculate final total after applying discounts
-                double totalDiscount = firstPurchaseDiscount + categoryDiscount;
-                double discountedAmount = totalPrice * totalDiscount;
-                double finalTotal = totalPrice - discountedAmount;
-
-                // Display discounts and final total below the shopping cart table
-                String discountsText = String.format("Discounts:\nFirst Purchase Discount: %.2f%%\nCategory Discount: %.2f%%\n", firstPurchaseDiscount * 100, categoryDiscount * 100);
-                String finalTotalText = String.format("Final Total: $%.2f (%.2f%% off)", finalTotal, totalDiscount * 100);
-
-                // Display selected details below the shopping cart table
-                String selectedDetails = labelBottom.getText();
-                labelBottom.setText(selectedDetails + "\n\n" + discountsText + "\n" + finalTotalText);
-
-                totalLabel.setText("Total: $" + String.format("%.2f", finalTotal));
+            });
 
 
-
-
-                // Update the total label
-                totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
-            }
+            shoppingCart.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            shoppingCart.add(cartPanel);
+            shoppingCart.setVisible(true);
+        } else {
+            shoppingCart.toFront(); // Bring the existing shopping cart frame to the front
         }
     }
+
+
+        /*   private void applyDiscounts() {
+        double totalPrice = calculateTotalPrice();
+
+        double firstPurchaseDiscount = 0.10;  // 10%
+
+
+        // Check for the first purchase
+        if (purchaseHistory.isEmpty()) {
+
+            double discountAmount = totalPrice * firstPurchaseDiscount;
+            totalPrice -= discountAmount;
+            firstPurchaseDiscountLabel.setText("First Purchase Discount: $" + String.format("%.2f", discountAmount));
+        } else {
+            firstPurchaseDiscountLabel.setText("First Purchase Discount: $0.00");
+        }
+
+        // Calculate the discount for the same category
+
+
+         // Check if there is any discount
+
+        // Update the final total label
+
+        finalTotalLabel.setText("Final Total: $" + String.format("%.2f", totalPrice+()));
+    }*/
+
+
+
+
+
+    // Calculate total price for products of a specific category in the shopping cart
+    private double calculateCategoryTotalPrice(String category) {
+        double categoryTotalPrice = 0.0;
+        for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+            String productInfo = shoppingCartModel.getValueAt(i, 0).toString();
+            if (productInfo.contains(category)) {
+                double price = (double) shoppingCartModel.getValueAt(i, 2);
+                int quantity = (int) shoppingCartModel.getValueAt(i, 1);
+                categoryTotalPrice += price * quantity;
+            }
+        }
+        return categoryTotalPrice;
+    }
+
+
+
+    private void updatePurchaseHistory(String userId, String productInfo) {
+        if (!purchaseHistory.containsKey(userId)) {
+            purchaseHistory.put(userId, new ArrayList<>());
+        }
+        purchaseHistory.get(userId).add(productInfo);
+    }
+
+    private double getProductPrice(String productInfo) {
+        for (int i = 0; i < productDataTable.getRowCount(); i++) {
+            String rowProductInfo = productDataTable.getValueAt(i, 0).toString();
+            if (rowProductInfo.equals(productInfo)) {
+                return Double.parseDouble(productDataTable.getValueAt(i, 3).toString());
+            }
+        }
+        return 0.0;
+    }
+
 
 
     private double calculateTotalPrice() {
@@ -389,29 +522,25 @@ public class ShoppingCart extends JFrame {
                 quantity -= shoppingCartItems.get(productId);
             }
 
-
-            Object[] rowData = {productId, name, category, price,quantity, extraInformation};
+            Object[] rowData = {productId, name, category, price, quantity, extraInformation};
             productModel.addRow(rowData);
         }
         productModel.fireTableDataChanged();
     }
-}
-
-class ShoppingCartFrame extends JFrame {
-    private JLabel totalLabel;
-    private JLabel FirstPurchaseDiscount;
-
-    public ShoppingCartFrame(String title) {
-        super(title);
-
+    private double SameCategoryDiscount(double total) {
+        double discountedValue=0;
+        for (int i = 0; i < shoppingCartModel.getRowCount(); i++) {
+            int quantity = (int) shoppingCartModel.getValueAt(i, 1);
+            if (quantity>=3){
+                discountedValue=(total*0.2);
+            }
+        }
+        return discountedValue;
     }
 
-    public void addTotalLabel(JLabel totalLabel) {
-        this.totalLabel = totalLabel;
-        JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelBottom.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
-        panelBottom.add("Center", totalLabel);
 
-        this.add(panelBottom, BorderLayout.SOUTH);
-    }
+
+
 }
+
+
