@@ -1,6 +1,30 @@
-product ID sd789
+product ID aa123
+product Name few
+product Price500.0
+product Quantity 20
+Product brand  dew
+Product Warranty Period  4
+product ID as789
+product Name edew
+product Price100.0
+product Quantity 1
+Product Size  l
+Product color  ewdw
+product ID as454
+product Name apple
+product Price400.0
+product Quantity 10
+Product brand  dwe
+Product Warranty Period  4
+product ID er789
 product Name apple
 product Price100.0
 product Quantity 10
-Product Size  XXL
-Product color  
+Product Size  XXl
+Product color  red
+product ID sd456
+product Name wdwe
+product Price400.0
+product Quantity 10
+Product brand  red
+Product Warranty Period  4
